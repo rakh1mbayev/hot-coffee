@@ -16,7 +16,7 @@ func PostMenu(w http.ResponseWriter, r *http.Request) {
 
 	file, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Println("Error reading file in: menu_handler -> PostMenu", err)
+		fmt.Println("Error reading file in: menu_handler -> PostMenu")
 		return
 	}
 	json.Unmarshal(file, &putMenu)

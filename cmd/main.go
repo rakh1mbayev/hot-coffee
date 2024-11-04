@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -57,6 +58,22 @@ Options:
 		defer file.Close()
 	}
 
+	if _, err := os.Stat(*flags.Dir + "/report.log"); err != nil { // Check if /report.log exists if not create
+		file, err := os.Create(*flags.Dir + "/report.log")
+		if err != nil {
+			fmt.Println("Error creating report.log in main.go -> main:", err)
+		}
+		defer file.Close()
+	}
+
+	file, err := os.OpenFile(*flags.Dir+"/report.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
+	if err != nil {
+		fmt.Println("Error opening file in: main.go.go -> main", err)
+		return
+	}
+
+	flags.Logger = slog.New(slog.NewTextHandler(file, nil))
+
 	mux := http.NewServeMux()
 
 	// orders
@@ -89,4 +106,6 @@ Options:
 	mux.HandleFunc("GET /reports/popular-items", handler.GetPopularItems)
 
 	log.Fatal(http.ListenAndServe(":7070", mux))
+
+	// WE NEED INTERFACE 
 }

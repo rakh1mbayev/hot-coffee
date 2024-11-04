@@ -11,6 +11,11 @@ import (
 func PostMenuService(putMenu model.MenuItem) {
 	// logic
 
+	if putMenu.ID == "" {
+		model.Logger.Error("Menu ID can not be empty")
+		return
+	}
+
 	fmt.Println(putMenu)
 	dal.PostMenuDal(putMenu)
 }
