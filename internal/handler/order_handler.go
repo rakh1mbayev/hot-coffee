@@ -14,14 +14,14 @@ import (
 func PostOrders(w http.ResponseWriter, r *http.Request) {
 	var order models.Order
 
-	handler := slog.NewJSONHandler(os.Stdout, nil)
-	logger := slog.New(handler)
+	handler := slog.NewJSONHandler(os.Stdout, nil) // Need for logger.Error()
+	logger := slog.New(handler)                    // Also need for logger.Error()
 	file, err := io.ReadAll(r.Body)
 	if err != nil {
 		logger.Error("Error reding file in: order_handler.go -> PostOrders")
 	}
 
-	json.Unmarshal(file, &order)
+	json.Unmarshal(file, &order) // from json to text
 	service.PostOrder(order)
 }
 

@@ -15,13 +15,25 @@ func main() {
 	flag.Parse()
 
 	if *flags.Help { // flag help I do not know where save it
+		fmt.Println(
+			`Coffee Shop Management System
+
+Usage:
+  hot-coffee [--port <N>] [--dir <S>] 
+  hot-coffee --help
+
+Options:
+  --help       Show this screen.
+  --port N     Port number.
+  --dir S      Path to the data directory.`)
+		return
 	}
 
-	if _, err := os.Stat(*flags.Dir); err != nil {
+	if _, err := os.Stat(*flags.Dir); err != nil { // Check if dir exists if not create
 		os.Mkdir(*flags.Dir, 0o755)
 	}
 
-	if _, err := os.Stat(*flags.Dir + "/menu.json"); err != nil {
+	if _, err := os.Stat(*flags.Dir + "/menu.json"); err != nil { // Check if /menu.json exists if not create
 		file, err := os.Create(*flags.Dir + "/menu.json")
 		if err != nil {
 			fmt.Println("Error creating menu.json in main.go -> main:", err)
@@ -29,7 +41,7 @@ func main() {
 		defer file.Close()
 	}
 
-	if _, err := os.Stat(*flags.Dir + "/inventory.json"); err != nil {
+	if _, err := os.Stat(*flags.Dir + "/inventory.json"); err != nil { // Check if inventory.json exists if not create
 		file, err := os.Create(*flags.Dir + "/inventory.json")
 		if err != nil {
 			fmt.Println("Error creating inventory.json in main.go -> main:", err)
@@ -37,7 +49,7 @@ func main() {
 		defer file.Close()
 	}
 
-	if _, err := os.Stat(*flags.Dir + "/orders.json"); err != nil {
+	if _, err := os.Stat(*flags.Dir + "/orders.json"); err != nil { // Check if orders.json exists if not create
 		file, err := os.Create(*flags.Dir + "/orders.json")
 		if err != nil {
 			fmt.Println("Error creating orders.json in main.go -> main:", err)

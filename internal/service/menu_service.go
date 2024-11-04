@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"net/http"
 
 	dal "hot-coffee/internal/dal"
@@ -10,6 +11,7 @@ import (
 func PostMenuService(putMenu model.MenuItem) {
 	// logic
 
+	fmt.Println(putMenu)
 	dal.PostMenuDal(putMenu)
 }
 
