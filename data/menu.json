@@ -46,5 +46,65 @@
 				"quantity": 1
 			}
 		]
+	},
+	{
+		"product_id": "espresso",
+		"name": "Espresso",
+		"description": "Strong and bold coffee",
+		"price": 2.5,
+		"ingredients": [
+			{
+				"ingredient_id": "espresso_shot",
+				"quantity": 1
+			}
+		]
+	},
+	{
+		"product_id": "espresso",
+		"name": "Espresso",
+		"description": "Strong and bold coffee",
+		"price": 2.5,
+		"ingredients": [
+			{
+				"ingredient_id": "espresso_shot",
+				"quantity": 1
+			}
+		]
+	},
+	{
+		"product_id": "espresso",
+		"name": "Espresso",
+		"description": "Strong and bold coffee",
+		"price": 2.5,
+		"ingredients": [
+			{
+				"ingredient_id": "espresso_shot",
+				"quantity": 1
+			}
+		]
+	},
+	{
+		"product_id": "espresso",
+		"name": "Espresso",
+		"description": "Strong and bold coffee",
+		"price": 2.5,
+		"ingredients": [
+			{
+				"ingredient_id": "espresso_shot",
+				"quantity": 1
+			}
+		]
+	},
+	{
+		"product_id": "espresso",
+		"name": "Espresso",
+		"description": "Strong and bold coffee",
+		"price": 2.5,
+		"ingredients": [
+			{
+				"ingredient_id": "espresso_shot",
+				"quantity": 1
+			}
+		]
 	}
 ]

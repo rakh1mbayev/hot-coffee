@@ -8,11 +8,18 @@ import (
 	model "hot-coffee/models"
 )
 
-func PostMenuService(putMenu model.MenuItem) {
+func PostMenuService(putMenu model.MenuItem, data []byte) {
 	// logic
+
+	// fmt.Println(string(data))
 
 	if putMenu.ID == "" {
 		model.Logger.Error("Menu ID can not be empty")
+		return
+	}
+
+	if putMenu.ID == string(data) {
+		fmt.Println("ID can not be same")
 		return
 	}
 

@@ -14,6 +14,16 @@ import (
 func PostMenu(w http.ResponseWriter, r *http.Request) {
 	var putMenu model.MenuItem
 
+	reader, err := os.Open(*model.Dir + "/menu.json")
+	if err != nil {
+		// error
+	}
+
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		// error
+	}
+
 	file, err := io.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println("Error reading file in: menu_handler -> PostMenu")
@@ -21,13 +31,19 @@ func PostMenu(w http.ResponseWriter, r *http.Request) {
 	}
 	json.Unmarshal(file, &putMenu)
 
-	service.PostMenuService(putMenu)
+	service.PostMenuService(putMenu, data)
 }
 
 func GetMenuHandler(w http.ResponseWriter, r *http.Request) {
-	file, _ := os.Open(*model.Dir + "/menu.json")
+	file, err := os.Open(*model.Dir + "/menu.json")
+	if err != nil {
+		// error
+	}
 	defer file.Close()
-	data, _ := io.ReadAll(file)
+	data, err := io.ReadAll(file)
+	if err != nil {
+		// error
+	}
 	service.GetMenuService(data, w)
 }
 
