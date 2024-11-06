@@ -6,7 +6,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"bufio"
 	"os"
 	"strings"
 
@@ -38,23 +37,33 @@ func GetMenuHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMenuID(w http.ResponseWriter, r *http.Request) {
-	file, err := os.Open(*model.Dir + "/menu.json")
-	defer file.Close()
-
+	file, err := os.ReadFile(*model.Dir + "/menu.json")
 	if err != nil {
-		slog.Error("Failed to open file "+*model.Dir+" /menu.json", err)
+		// error
 	}
-
 	path := strings.Split(r.URL.Path[1:], "/")
 	id := path[1]
-	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanWords)
+	fmt.Println("ENTERED")
 
-	lastWord := "none"
-	for scanner.Scan() {
-		word := scanner.Text()
-		if word == "\"product_id":""
+	var menuItems []model.MenuItem
+	err = json.Unmarshal(file, &menuItems)
+	if err != nil {
+		// error
 	}
+	fmt.Println(id)
+	for _, item := range menuItems {
+		fmt.Println("ITEM", item.ID)
+		if item.ID == id {
+			result, err := json.Marshal(item)
+			if err != nil {
+				// error
+			}
+			service.GetMenuService(result, w)
+			return
+		}
+	}
+	fmt.Println("DOES NOT EXIST")
+	// item does not existf
 }
 
 func PutMenuID(w http.ResponseWriter, r *http.Request) {
