@@ -19,7 +19,7 @@ func PostMenuDal(putMenu models.MenuItem) {
 			if err := json.Unmarshal(file, &singleItem); err != nil {
 				log.Fatalf("Error unmarshaling JSON file in: menu_repository.go -> PostMenuDal %v", err)
 			}
-			
+
 			menuItems = append(menuItems, singleItem)
 		}
 	}

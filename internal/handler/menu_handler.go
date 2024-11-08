@@ -13,15 +13,21 @@ import (
 
 func PostMenu(w http.ResponseWriter, r *http.Request) {
 	var putMenu model.MenuItem
+	var put model.MenuItemIngredient
+	var checkMenu []model.MenuItem
 
-	reader, err := os.Open(*model.Dir + "/menu.json")
-	if err != nil {
-		// error
-	}
+	if data, err := os.ReadFile(*model.Dir + "/menu.json"); err == nil && len(data) > 0 {
+		if err := json.Unmarshal(data, &checkMenu); err != nil {
 
-	data, err := io.ReadAll(reader)
-	if err != nil {
-		// error
+			var checkMenuSingle model.MenuItem
+			if err := json.Unmarshal(data, &checkMenuSingle); err != nil {
+				// error
+				fmt.Println("Error unmarshal file in: menu_handler.go -> PostMenu")
+				return
+			}
+
+			checkMenu = append(checkMenu, checkMenuSingle)
+		}
 	}
 
 	file, err := io.ReadAll(r.Body)
@@ -30,8 +36,10 @@ func PostMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.Unmarshal(file, &putMenu)
+	json.Unmarshal(file, &put)
 
-	service.PostMenuService(putMenu, data)
+
+	service.PostMenuService(putMenu, put, checkMenu)
 }
 
 func GetMenuHandler(w http.ResponseWriter, r *http.Request) {
