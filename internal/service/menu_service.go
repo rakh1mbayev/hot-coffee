@@ -8,10 +8,11 @@ import (
 	model "hot-coffee/models"
 )
 
-func PostMenuService(putMenu model.MenuItem, put model.MenuItemIngredient, checkMenu []model.MenuItem) {
+func PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem) {
 	// logic
 
 	if putMenu.ID == "" {
+		fmt.Println("Menu ID can not be empty")
 		model.Logger.Error("Menu ID can not be empty")
 		return
 	}
@@ -26,18 +27,20 @@ func PostMenuService(putMenu model.MenuItem, put model.MenuItemIngredient, check
 		return
 	}
 
-	if put.IngredientID == "" {
-		fmt.Println("Ingredient ID can not be empty. Please write ingredient ID name")
-		return
-	}
-	
-	if put.Quantity <= 0 {
-		fmt.Println("Quantity of ingredient cao not be equal or lesser than 0 (quantity > 0)")
-		return
+	for _, val := range putMenu.Ingredients {
+		if val.IngredientID == "" {
+			fmt.Println("Ingredient ID can not be empty. Please write ingredient ID")
+			return
+		}
+
+		if val.Quantity <= 0 {
+			fmt.Println("Quantity of ingredient can not be equal or lesser than 0 (quantity > 0)")
+			return
+		}
 	}
 
-	for _, val := range checkMenu {
-		if val.ID == putMenu.ID {
+	for _, vol := range checkMenu {
+		if vol.ID == putMenu.ID {
 			fmt.Println("Id can not be same")
 			return
 		}
