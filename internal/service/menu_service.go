@@ -8,7 +8,18 @@ import (
 	model "hot-coffee/models"
 )
 
-func PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem) {
+type Serv_menu interface {
+	PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem)
+}
+type Menu_serv struct {
+	menu_dal dal.Dal_menu
+}
+
+func NewDefault_servmenu(menu_dal dal.Dal_menu) *Menu_serv {
+	return &Menu_serv{menu_dal: menu_dal}
+}
+
+func (s *Menu_serv) PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem) {
 	// logic
 
 	if putMenu.ID == "" {

@@ -9,7 +9,19 @@ import (
 	"hot-coffee/models"
 )
 
-func PostMenuDal(putMenu models.MenuItem) {
+type Dal_menu interface{
+	PostMenuDal(putMenu models.MenuItem)
+}
+
+type Menu_dal struct{
+	Datapath string
+}
+
+func NewDefault(datapath string)*Menu_dal{
+	return &Menu_dal{Datapath: datapath}
+}
+
+func (dal *Menu_dal)PostMenuDal(putMenu models.MenuItem) {
 	var menuItems []models.MenuItem
 
 	if file, err := os.ReadFile(*models.Dir + "/menu.json"); err == nil && len(file) > 0 {

@@ -11,6 +11,14 @@ import (
 	model "hot-coffee/models"
 )
 
+type Menu_handle interface {
+	PostMenu(w http.ResponseWriter, r *http.Request)
+}
+
+type Menuhandler struct {
+	Menu_serve service.Menu_serv
+}
+
 func PostMenu(w http.ResponseWriter, r *http.Request) {
 	var putMenu model.MenuItem
 	var checkMenu []model.MenuItem

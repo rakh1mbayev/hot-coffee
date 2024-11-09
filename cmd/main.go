@@ -8,12 +8,18 @@ import (
 	"net/http"
 	"os"
 
+	"hot-coffee/internal/dal"
 	handler "hot-coffee/internal/handler"
+	"hot-coffee/internal/service"
 	flags "hot-coffee/models"
 )
 
 func main() {
 	flag.Parse()
+	
+	dal_menu:=dal.NewDefault(*flags.Dir)
+	serve_menu := service.NewDefault_servmenu(dal_menu)
+
 
 	if *flags.Help { // flag help I do not know where save it
 		fmt.Println(
@@ -92,6 +98,8 @@ Options:
 	mux.HandleFunc("GET /menu/{id}", handler.GetMenuID)
 	mux.HandleFunc("PUT /menu/{id}", handler.PutMenuID)
 	mux.HandleFunc("DELETE /menu/{id}", handler.DeleteMenuID)
+
+	
 
 	// inventory
 	// need finish second
