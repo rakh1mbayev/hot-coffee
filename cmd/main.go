@@ -16,10 +16,6 @@ import (
 
 func main() {
 	flag.Parse()
-	
-	dal_menu:=dal.NewDefault(*flags.Dir)
-	serve_menu := service.NewDefault_servmenu(dal_menu)
-
 
 	if *flags.Help { // flag help I do not know where save it
 		fmt.Println(
@@ -93,13 +89,15 @@ Options:
 
 	// menu
 	// need finish first
-	mux.HandleFunc("POST /menu", handler.PostMenu)
+	dal_menu := dal.NewDefault(*flags.Dir + "/menu.json")
+	serve_menu := service.NewDefault_servmenu(dal_menu)
+	menu_handler := handler.NewMenuHandler(serve_menu)
+
+	mux.HandleFunc("POST /menu", menu_handler.PostMenu)
 	mux.HandleFunc("GET /menu", handler.GetMenuHandler)
 	mux.HandleFunc("GET /menu/{id}", handler.GetMenuID)
 	mux.HandleFunc("PUT /menu/{id}", handler.PutMenuID)
 	mux.HandleFunc("DELETE /menu/{id}", handler.DeleteMenuID)
-
-	
 
 	// inventory
 	// need finish second
@@ -115,5 +113,5 @@ Options:
 
 	log.Fatal(http.ListenAndServe(":7070", mux))
 
-	// WE NEED INTERFACE 
+	// WE NEED INTERFACE
 }

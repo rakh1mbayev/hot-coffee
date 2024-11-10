@@ -46,5 +46,37 @@
 				"quantity": 5
 			}
 		]
+	},
+	{
+		"product_id": "cola",
+		"name": "soda",
+		"description": "Sweete drink",
+		"price": 1.2,
+		"ingredients": [
+			{
+				"ingredient_id": "Sugar",
+				"quantity": 2
+			},
+			{
+				"ingredient_id": "Water",
+				"quantity": 5
+			}
+		]
+	},
+	{
+		"product_id": "pepsi",
+		"name": "soda",
+		"description": "Sweete drink",
+		"price": 1.2,
+		"ingredients": [
+			{
+				"ingredient_id": "Sugar",
+				"quantity": 2
+			},
+			{
+				"ingredient_id": "Water",
+				"quantity": 5
+			}
+		]
 	}
 ]

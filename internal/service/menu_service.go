@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"net/http"
 
 	dal "hot-coffee/internal/dal"
 	model "hot-coffee/models"
@@ -12,11 +11,11 @@ type Serv_menu interface {
 	PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem)
 }
 type Menu_serv struct {
-	menu_dal dal.Dal_menu
+	menu_dal dal.Menu_dal
 }
 
-func NewDefault_servmenu(menu_dal dal.Dal_menu) *Menu_serv {
-	return &Menu_serv{menu_dal: menu_dal}
+func NewDefault_servmenu(menu_dal *dal.Menu_dal) *Menu_serv {
+	return &Menu_serv{menu_dal: *menu_dal}
 }
 
 func (s *Menu_serv) PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem) {
@@ -57,11 +56,6 @@ func (s *Menu_serv) PostMenuService(putMenu model.MenuItem, checkMenu []model.Me
 		}
 	}
 
-	dal.PostMenuDal(putMenu)
+	s.menu_dal.PostMenuDal(putMenu)
 }
 
-func GetMenuService(data []byte, w http.ResponseWriter) {
-	// logic check
-
-	dal.GetMenuDal(data, w)
-}
