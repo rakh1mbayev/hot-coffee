@@ -4,119 +4,198 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 
-	service "hot-coffee/internal/service"
 	model "hot-coffee/models"
-	dal "hot-coffee/internal/dal"
 )
 
-type Menu_handle interface {
-	PostMenu(w http.ResponseWriter, r *http.Request)
+// model
+
+// MenuService Interface (SRP, OCP)
+type MenuService interface {
+	PostMenu(item model.MenuItem, existingItems []model.MenuItem) error
+	GetMenu() ([]model.MenuItem, error)
+	GetMenuItemByID(id string) (*model.MenuItem, error)
+	PutMenuItem(id string, item model.MenuItem) (*model.MenuItem, error)
+	DeleteMenuItem(id string) error
 }
 
-type Menuhandler struct {
-	Menu_serve service.Menu_serv
+// Service Implementation
+type FileMenuService struct {
+	filePath string
 }
 
-func NewMenuHandler(Menu_serve *service.Menu_serv) *Menuhandler {
-	return &Menuhandler{Menu_serve: *Menu_serve}
+func (f *FileMenuService) PostMenu(item model.MenuItem, existingItems []model.MenuItem) error {
+	existingItems = append(existingItems, item)
+	return f.saveMenuItems(existingItems)
 }
 
-func (m *Menuhandler) PostMenu(w http.ResponseWriter, r *http.Request) {
-	var putMenu model.MenuItem
-	var checkMenu []model.MenuItem
-
-	if data, err := os.ReadFile(*model.Dir + "/menu.json"); err == nil && len(data) > 0 {
-		if err := json.Unmarshal(data, &checkMenu); err != nil {
-
-			var checkMenuSingle model.MenuItem
-			if err := json.Unmarshal(data, &checkMenuSingle); err != nil {
-				// error
-				fmt.Println("Error unmarshal file in: menu_handler.go -> PostMenu")
-				return
-			}
-
-			checkMenu = append(checkMenu, checkMenuSingle)
-		}
-	}
-
-	file, err := io.ReadAll(r.Body)
-	if err != nil {
-		fmt.Println("Error read body in: menu_handler.go -> PostMenu", err)
-		return
-	}
-
-	if err := json.Unmarshal(file, &putMenu); err != nil {
-		fmt.Println("Error unmarshaling putMenu in: menu_handler.go -> PostMenu")
-		return
-	}
-
-	m.Menu_serve.PostMenuService(putMenu, checkMenu)
+func (f *FileMenuService) GetMenu() ([]model.MenuItem, error) {
+	return f.loadMenuItems()
 }
 
-// GetMenuDal
-func GetMenuHandler(w http.ResponseWriter, r *http.Request) {
-	file, err := os.Open(*model.Dir + "/menu.json")
+func (f *FileMenuService) GetMenuItemByID(id string) (*model.MenuItem, error) {
+	items, err := f.loadMenuItems()
 	if err != nil {
-		// error
+		return nil, err
 	}
-	defer file.Close()
-	if err != nil {
-		slog.Error("Failed to open file "+*model.Dir+" /menu.json", err)
-	}
-	data, err := io.ReadAll(file)
-	if err != nil {
-		// error
-	}
-	dal.GetMenuDal(data, w)
-}
-
-type Getter interface {
-	Get(w http.ResponseWriter, r *http.Request)
-}
-
-type GetMenuID struct{}
-
-func (m GetMenuID) Get(w http.ResponseWriter, r *http.Request) {
-	file, err := os.ReadFile(*model.Dir + "/menu.json")
-	if err != nil {
-		// error
-	}
-	path := strings.Split(r.URL.Path[1:], "/")
-	id := path[1]
-	fmt.Println("ENTERED")
-
-	var menuItems []model.MenuItem
-	err = json.Unmarshal(file, &menuItems)
-	if err != nil {
-		// error
-	}
-	fmt.Println(id)
-	for _, item := range menuItems {
-		fmt.Println("ITEM", item.ID)
+	for _, item := range items {
 		if item.ID == id {
-			result, err := json.Marshal(item)
-			if err != nil {
-				// error
-			}
-			service.GetMenuService(result, w)
-			return
+			return &item, nil
 		}
 	}
-	fmt.Println("DOES NOT EXIST")
-	// item does not existf
+	return nil, fmt.Errorf("menu item not found")
 }
 
-type PutMenuID struct{}
-
-func (m PutMenuID) Put(w http.ResponseWriter, r *http.Request) {
+func (f *FileMenuService) PutMenuItem(id string, item model.MenuItem) (*model.MenuItem, error) {
+	items, err := f.loadMenuItems()
+	if err != nil {
+		return nil, err
+	}
+	for i, existingItem := range items {
+		if existingItem.ID == id {
+			items[i] = item
+			if err := f.saveMenuItems(items); err != nil {
+				return nil, err
+			}
+			return &item, nil
+		}
+	}
+	return nil, fmt.Errorf("menu item not found")
 }
 
-type DeleteMenuID struct{}
+func (f *FileMenuService) DeleteMenuItem(id string) error {
+	items, err := f.loadMenuItems()
+	if err != nil {
+		return err
+	}
+	var updatedItems []model.MenuItem
+	for _, item := range items {
+		if item.ID != id {
+			updatedItems = append(updatedItems, item)
+		}
+	}
+	return f.saveMenuItems(updatedItems)
+}
 
-func (m DeleteMenuID) Delete(w http.ResponseWriter, r *http.Request) {
+// Helper functions for file I/O
+func (f *FileMenuService) loadMenuItems() ([]model.MenuItem, error) {
+	file, err := os.ReadFile(f.filePath)
+	if err != nil {
+		return nil, err
+	}
+	var items []model.MenuItem
+	if err := json.Unmarshal(file, &items); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (f *FileMenuService) saveMenuItems(items []model.MenuItem) error {
+	fileData, err := json.Marshal(items)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(f.filePath, fileData, 0644)
+}
+
+// MenuHandler (SRP, DIP)
+type MenuHandler struct {
+	service MenuService
+}
+
+func NewMenuHandler(service MenuService) *MenuHandler {
+	return &MenuHandler{service: service}
+}
+
+func (m *MenuHandler) PostMenu(w http.ResponseWriter, r *http.Request) {
+	var newMenuItem model.MenuItem
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		return
+	}
+	if err := json.Unmarshal(body, &newMenuItem); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	existingItems, _ := m.service.GetMenu() // Can handle error if necessary
+	if err := m.service.PostMenu(newMenuItem, existingItems); err != nil {
+		http.Error(w, "Failed to add menu item", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}
+
+// Get Menu Handler (SRP)
+func (m *MenuHandler) GetMenu(w http.ResponseWriter, r *http.Request) {
+	items, err := m.service.GetMenu()
+	if err != nil {
+		http.Error(w, "Failed to load menu", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(items)
+}
+
+// Get Menu Item by ID Handler (SRP)
+func (m *MenuHandler) GetMenuItemByID(w http.ResponseWriter, r *http.Request) {
+	path := strings.Split(r.URL.Path, "/")
+	if len(path) < 3 {
+		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		return
+	}
+	item, err := m.service.GetMenuItemByID(path[2])
+	if err != nil {
+		http.Error(w, "Menu item not found", http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode(item)
+}
+
+// Put Menu Item by ID Handler (SRP)
+func (m *MenuHandler) PutMenuItem(w http.ResponseWriter, r *http.Request) {
+	var updatedItem model.MenuItem
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		return
+	}
+	if err := json.Unmarshal(body, &updatedItem); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	path := strings.Split(r.URL.Path, "/")
+	if len(path) < 3 {
+		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		return
+	}
+
+	item, err := m.service.PutMenuItem(path[2], updatedItem)
+	if err != nil {
+		http.Error(w, "Menu item not found", http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode(item)
+}
+
+// Delete Menu Item by ID Handler (SRP)
+func (m *MenuHandler) DeleteMenuItem(w http.ResponseWriter, r *http.Request) {
+	path := strings.Split(r.URL.Path, "/")
+	if len(path) < 3 {
+		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		return
+	}
+
+	err := m.service.DeleteMenuItem(path[2])
+	if err != nil {
+		http.Error(w, "Menu item not found", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

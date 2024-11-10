@@ -2,11 +2,10 @@ package dal
 
 import (
 	"encoding/json"
+	"hot-coffee/models"
 	"log"
 	"net/http"
 	"os"
-
-	"hot-coffee/models"
 )
 
 type Dal_menu interface {

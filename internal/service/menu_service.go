@@ -1,7 +1,10 @@
 package service
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
 
 	dal "hot-coffee/internal/dal"
 	model "hot-coffee/models"
@@ -58,4 +61,79 @@ func (s *Menu_serv) PostMenuService(putMenu model.MenuItem, checkMenu []model.Me
 	}
 
 	s.menu_dal.PostMenuDal(putMenu)
+}
+
+func GetMenuItem(id string) (model.MenuItem, error) {
+	file, err := os.ReadFile(*model.Dir + "/menu.json")
+	if err != nil {
+		// error
+	}
+
+	var menuItems []model.MenuItem
+	err = json.Unmarshal(file, &menuItems)
+	if err != nil {
+		// error
+	}
+	for _, item := range menuItems {
+		fmt.Println("ITEM", item.ID)
+		if item.ID == id {
+			return item, nil
+		}
+	}
+	return model.MenuItem{}, errors.New("ERROR: didn't found any item with given id")
+}
+
+func PutMenuItem(id string, item model.MenuItem) ([]byte, error) {
+	file, err := os.ReadFile(*model.Dir + "/menu.json")
+	if err != nil {
+		return []byte{}, err
+	}
+	MenuItems := []model.MenuItem{}
+	if err = json.Unmarshal(file, &MenuItems); err != nil {
+		return []byte{}, err
+	}
+	found := false
+	for i := 0; i < len(MenuItems); i++ {
+		if MenuItems[i].ID == id {
+			MenuItems[i] = item
+			found = true
+			break
+		}
+	}
+	if !found {
+		return []byte{}, errors.New("ERROR: didn't found any item with given id")
+	}
+	file, err = json.Marshal(MenuItems)
+	if err != nil {
+		return []byte{}, err
+	}
+	return file, nil
+}
+
+func DeleteMenuItem(id string, item model.MenuItem) ([]byte, error) {
+	file, err := os.ReadFile(*model.Dir + "/menu.json")
+	if err != nil {
+		return []byte{}, err
+	}
+	MenuItems := []model.MenuItem{}
+	if err = json.Unmarshal(file, &MenuItems); err != nil {
+		return []byte{}, err
+	}
+	found := false
+	NewMenuItems := []model.MenuItem{}
+	for _, MenuItem := range MenuItems {
+		if MenuItem.ID == id {
+			found = true
+			continue
+		}
+		NewMenuItems = append(NewMenuItems, MenuItem)
+	}
+	if !found {
+		return []byte{}, errors.New("ERROR: didn't found any item with given id")
+	}
+	file, err = json.Marshal(NewMenuItems)
+	if err != nil {
+		return []byte{}, err
+	}
+	return file, nil
 }
