@@ -1,8 +1,11 @@
 package service
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
 
 	dal "hot-coffee/internal/dal"
 	model "hot-coffee/models"
@@ -11,6 +14,7 @@ import (
 type Serv_menu interface {
 	PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem)
 }
+
 type Menu_serv struct {
 	menu_dal dal.Dal_menu
 }
@@ -64,4 +68,24 @@ func GetMenuService(data []byte, w http.ResponseWriter) {
 	// logic check
 
 	dal.GetMenuDal(data, w)
+}
+
+func GetMenuItem(id string) (model.MenuItem, error) {
+	file, err := os.ReadFile(*model.Dir + "/menu.json")
+	if err != nil {
+		// error
+	}
+
+	var menuItems []model.MenuItem
+	err = json.Unmarshal(file, &menuItems)
+	if err != nil {
+		// error
+	}
+	for _, item := range menuItems {
+		fmt.Println("ITEM", item.ID)
+		if item.ID == id {
+			return item, nil
+		}
+	}
+	return model.MenuItem{}, errors.New("ERROR: didn't found any item with given id")
 }
