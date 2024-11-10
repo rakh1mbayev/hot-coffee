@@ -66,15 +66,8 @@ func (f *FileMenuService) PutMenuItem(id string, item model.MenuItem) (*model.Me
 	return nil, fmt.Errorf("menu item not found")
 }
 
-<<<<<<< HEAD
 func (f *FileMenuService) DeleteMenuItem(id string) error {
 	items, err := f.loadMenuItems()
-=======
-// Erganat
-
-func GetMenuHandler(w http.ResponseWriter, r *http.Request) {
-	file, err := os.Open(*model.Dir + "/menu.json")
->>>>>>> d7d1c89df6ca3c2baddc084f6e6f330e4ae84b57
 	if err != nil {
 		return err
 	}

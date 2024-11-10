@@ -3,14 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
+	"hot-coffee/internal/dal"
+	"hot-coffee/internal/service"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 
-	"hot-coffee/internal/dal"
 	handler "hot-coffee/internal/handler"
-	"hot-coffee/internal/service"
+
 	flags "hot-coffee/models"
 )
 
@@ -94,10 +95,10 @@ Options:
 	menu_handler := handler.NewMenuHandler(serve_menu)
 
 	mux.HandleFunc("POST /menu", menu_handler.PostMenu)
-	mux.HandleFunc("GET /menu", handler.GetMenuHandler)
-	mux.HandleFunc("GET /menu/{id}", handler.GetMenuID)
-	mux.HandleFunc("PUT /menu/{id}", handler.PutMenuID)
-	mux.HandleFunc("DELETE /menu/{id}", handler.DeleteMenuID)
+	mux.HandleFunc("GET /menu", menu_handler.GetMenu)
+	mux.HandleFunc("GET /menu/{id}", menu_handler.GetMenuItemByID)
+	mux.HandleFunc("PUT /menu/{id}", menu_handler.PutMenuItem)
+	mux.HandleFunc("DELETE /menu/{id}", menu_handler.DeleteMenuItem)
 
 	// inventory
 	// need finish second
