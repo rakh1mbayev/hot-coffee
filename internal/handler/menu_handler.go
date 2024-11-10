@@ -11,6 +11,7 @@ import (
 
 	service "hot-coffee/internal/service"
 	model "hot-coffee/models"
+	dal "hot-coffee/internal/dal"
 )
 
 type Menu_handle interface {
@@ -21,7 +22,11 @@ type Menuhandler struct {
 	Menu_serve service.Menu_serv
 }
 
-func PostMenu(w http.ResponseWriter, r *http.Request) {
+func NewMenuHandler(Menu_serve *service.Menu_serv) *Menuhandler {
+	return &Menuhandler{Menu_serve: *Menu_serve}
+}
+
+func (m *Menuhandler) PostMenu(w http.ResponseWriter, r *http.Request) {
 	var putMenu model.MenuItem
 	var checkMenu []model.MenuItem
 
@@ -50,9 +55,10 @@ func PostMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service.PostMenuService(putMenu, checkMenu)
+	m.Menu_serve.PostMenuService(putMenu, checkMenu)
 }
 
+// GetMenuDal
 func GetMenuHandler(w http.ResponseWriter, r *http.Request) {
 	file, err := os.Open(*model.Dir + "/menu.json")
 	if err != nil {
@@ -66,7 +72,7 @@ func GetMenuHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// error
 	}
-	service.GetMenuService(data, w)
+	dal.GetMenuDal(data, w)
 }
 
 type Getter interface {
