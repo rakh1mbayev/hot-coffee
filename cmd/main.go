@@ -4,24 +4,43 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
+	"hot-coffee/internal/dal"
 	handler "hot-coffee/internal/handler"
+	"hot-coffee/internal/service"
 	flags "hot-coffee/models"
 )
 
 func main() {
 	flag.Parse()
+	
+	dal_menu:=dal.NewDefault(*flags.Dir)
+	serve_menu := service.NewDefault_servmenu(dal_menu)
+
 
 	if *flags.Help { // flag help I do not know where save it
+		fmt.Println(
+			`Coffee Shop Management System
+
+Usage:
+  hot-coffee [--port <N>] [--dir <S>] 
+  hot-coffee --help
+
+Options:
+  --help       Show this screen.
+  --port N     Port number.
+  --dir S      Path to the data directory.`)
+		return
 	}
 
-	if _, err := os.Stat(*flags.Dir); err != nil {
+	if _, err := os.Stat(*flags.Dir); err != nil { // Check if dir exists if not create
 		os.Mkdir(*flags.Dir, 0o755)
 	}
 
-	if _, err := os.Stat(*flags.Dir + "/menu.json"); err != nil {
+	if _, err := os.Stat(*flags.Dir + "/menu.json"); err != nil { // Check if /menu.json exists if not create
 		file, err := os.Create(*flags.Dir + "/menu.json")
 		if err != nil {
 			fmt.Println("Error creating menu.json in main.go -> main:", err)
@@ -29,7 +48,7 @@ func main() {
 		defer file.Close()
 	}
 
-	if _, err := os.Stat(*flags.Dir + "/inventory.json"); err != nil {
+	if _, err := os.Stat(*flags.Dir + "/inventory.json"); err != nil { // Check if inventory.json exists if not create
 		file, err := os.Create(*flags.Dir + "/inventory.json")
 		if err != nil {
 			fmt.Println("Error creating inventory.json in main.go -> main:", err)
@@ -37,13 +56,29 @@ func main() {
 		defer file.Close()
 	}
 
-	if _, err := os.Stat(*flags.Dir + "/orders.json"); err != nil {
+	if _, err := os.Stat(*flags.Dir + "/orders.json"); err != nil { // Check if orders.json exists if not create
 		file, err := os.Create(*flags.Dir + "/orders.json")
 		if err != nil {
 			fmt.Println("Error creating orders.json in main.go -> main:", err)
 		}
 		defer file.Close()
 	}
+
+	if _, err := os.Stat(*flags.Dir + "/report.log"); err != nil { // Check if /report.log exists if not create
+		file, err := os.Create(*flags.Dir + "/report.log")
+		if err != nil {
+			fmt.Println("Error creating report.log in main.go -> main:", err)
+		}
+		defer file.Close()
+	}
+
+	file, err := os.OpenFile(*flags.Dir+"/report.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
+	if err != nil {
+		fmt.Println("Error opening file in: main.go.go -> main", err)
+		return
+	}
+
+	flags.Logger = slog.New(slog.NewTextHandler(file, nil))
 
 	mux := http.NewServeMux()
 
@@ -64,6 +99,8 @@ func main() {
 	mux.HandleFunc("PUT /menu/{id}", handler.PutMenuID)
 	mux.HandleFunc("DELETE /menu/{id}", handler.DeleteMenuID)
 
+	
+
 	// inventory
 	// need finish second
 	mux.HandleFunc("POST /inventory", handler.PostInventory)
@@ -77,4 +114,6 @@ func main() {
 	mux.HandleFunc("GET /reports/popular-items", handler.GetPopularItems)
 
 	log.Fatal(http.ListenAndServe(":7070", mux))
+
+	// WE NEED INTERFACE 
 }
