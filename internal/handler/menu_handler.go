@@ -53,6 +53,8 @@ func PostMenu(w http.ResponseWriter, r *http.Request) {
 	service.PostMenuService(putMenu, checkMenu)
 }
 
+// Erganat
+
 func GetMenuHandler(w http.ResponseWriter, r *http.Request) {
 	file, err := os.Open(*model.Dir + "/menu.json")
 	if err != nil {
