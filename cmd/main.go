@@ -89,7 +89,7 @@ Options:
 
 	// menu
 	// need finish first
-	dal_menu := dal.NewDefault(*flags.Dir + "/menu.json")
+	dal_menu := dal.NewMenuRepo(*flags.Dir + "/menu.json")
 	serve_menu := service.NewDefault_servmenu(dal_menu)
 	menu_handler := handler.NewMenuHandler(serve_menu)
 
@@ -101,7 +101,11 @@ Options:
 
 	// inventory
 	// need finish second
-	mux.HandleFunc("POST /inventory", handler.PostInventory)
+	dal_inventory := dal.NewInventoryRepo(*flags.Dir + "/inventory.json")
+	serve_inventory := service.NewDefault_servinventory(dal_inventory)
+	inventory_handler := handler.NewInventoryHandler(serve_inventory)
+
+	mux.HandleFunc("POST /inventory", inventory_handler.PostInventory)
 	mux.HandleFunc("GET /inventory", handler.GetInventory)
 	mux.HandleFunc("GET /inventory/{id}", handler.GetInventoryID)
 	mux.HandleFunc("PUT /inventory/{id}", handler.PutInventoryID)

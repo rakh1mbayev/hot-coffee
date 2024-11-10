@@ -2,9 +2,21 @@ package handler
 
 import (
 	"net/http"
+
+	"hot-coffee/internal/service"
 )
 
-func PostInventory(w http.ResponseWriter, r *http.Request) {
+type Inventory_handle interface{}
+
+type Inventoryhandler struct {
+	Inventory_serve service.Inventory_serv
+}
+
+func NewInventoryHandler(Inventory_serve *service.Inventory_serv) *Inventoryhandler {
+	return &Inventoryhandler{Inventory_serve: *Inventory_serve}
+}
+
+func (i Inventoryhandler) PostInventory(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetInventory(w http.ResponseWriter, r *http.Request) {

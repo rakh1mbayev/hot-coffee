@@ -15,11 +15,11 @@ type Dal_menu interface {
 }
 
 type Menu_dal struct {
-	Datapath string
+	DatapathMenu string
 }
 
-func NewDefault(datapath string) *Menu_dal {
-	return &Menu_dal{Datapath: datapath}
+func NewMenuRepo(datapath string) *Menu_dal {
+	return &Menu_dal{DatapathMenu: datapath}
 }
 
 func (dal *Menu_dal) PostMenuDal(putMenu models.MenuItem) {
