@@ -40,12 +40,8 @@ func (m *MenuHandler) GetMenu(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *MenuHandler) GetMenuItemByID(w http.ResponseWriter, r *http.Request) {
-	path := strings.Split(r.URL.Path, "/")
-	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
-		return
-	}
-	item, err := m.service.GetMenuItemByID(path[2])
+	id := r.PathValue("id")
+	item, err := m.service.GetMenuItemByID(id)
 	if err != nil {
 		http.Error(w, "Menu item not found", http.StatusNotFound)
 		return

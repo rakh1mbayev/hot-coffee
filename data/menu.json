@@ -14,5 +14,21 @@
 				"quantity": 32
 			}
 		]
+	},
+	{
+		"product_id": "cola",
+		"name": "Caffe",
+		"description": "Espresso with steamed milk",
+		"price": 3.5,
+		"ingredients": [
+			{
+				"ingredient_id": "lol",
+				"quantity": 2
+			},
+			{
+				"ingredient_id": "kek",
+				"quantity": 32
+			}
+		]
 	}
 ]
