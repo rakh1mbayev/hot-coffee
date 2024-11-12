@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"fmt"
 	"hot-coffee/internal/dal"
 	"hot-coffee/models"
 )
@@ -12,7 +11,7 @@ type InventoryServiceInterface interface {
 	Get() ([]models.InventoryItem, error)
 	GetByID(id string) (models.InventoryItem, error)
 	Delete(string) error
-	Update(string, models.InventoryItem) error
+	Update(string, models.InventoryItem) (*models.InventoryItem ,error)
 }
 
 type inventoryService struct {
@@ -66,7 +65,6 @@ func (s *inventoryService) Add(newInventoryItem models.InventoryItem) error {
 
 func (s *inventoryService) Get() ([]models.InventoryItem, error) {
 	return s.inventoryAccess.GetAll()
-	return s.inventoryAccess.GetAll()
 }
 
 func (s *inventoryService) GetByID(id string) (models.InventoryItem, error) {
@@ -82,8 +80,21 @@ func (s *inventoryService) GetByID(id string) (models.InventoryItem, error) {
 	return models.InventoryItem{}, fmt.Errorf("menu item not found")
 }
 
-func (s *inventoryService) Update(string, models.InventoryItem) error {
-	return nil
+func (s *inventoryService) Update(id string, item models.InventoryItem) (*models.InventoryItem, error) {
+	items, err := s.inventoryAccess.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	for i, existingItem := range items {
+		if existingItem.IngredientID == id {
+			items[i] = item
+			if err := s.inventoryAccess.SaveInventoryItems(items); err != nil {
+				return nil, err
+			}
+			return &item, nil
+		}
+	}
+	return nil, fmt.Errorf("menu item not found")
 }
 
 func (s *inventoryService) Delete(id string) error {
@@ -97,5 +108,5 @@ func (s *inventoryService) Delete(id string) error {
 			updatedItems = append(updatedItems, item)
 		}
 	}
-	return s.inventoryAccess.SaveInventoryItems(items)
+	return s.inventoryAccess.SaveInventoryItems(updatedItems)
 }

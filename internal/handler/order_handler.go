@@ -21,15 +21,21 @@ func (o *OrderHandler) Add(w http.ResponseWriter, r *http.Request) {
 	var newOrderItem model.OrderItem
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		model.Logger.Error("Error reading request body")
+		service.ErrorHandling("Error reading request body", w)
 		return
 	}
 	if err := json.Unmarshal(body, &newOrderItem); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		model.Logger.Error("Invalid JSON")
+		service.ErrorHandling("Invalid JSON", w)
 		return
 	}
 	if err := o.service.Add(newOrderItem); err != nil {
-		http.Error(w, "Failed to add order item", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
+		model.Logger.Error("Failed to add order item")
+		service.ErrorHandling("Failed to add order item", w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
@@ -38,7 +44,9 @@ func (o *OrderHandler) Add(w http.ResponseWriter, r *http.Request) {
 func (o *OrderHandler) Get(w http.ResponseWriter, r *http.Request) {
 	items, err := o.service.Get()
 	if err != nil {
-		http.Error(w, "Failed to load orders", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		model.Logger.Error("Failed to load orders")
+		service.ErrorHandling("Failed to load orders", w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
@@ -46,48 +54,60 @@ func (o *OrderHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
 func (o *OrderHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		model.Logger.Error("Invalid request path")
+		service.ErrorHandling("Invalid request path", w)
 		return
 	}
 	item, err := o.service.GetByID(path[2])
 	if err != nil {
-		http.Error(w, "Order item not found", http.StatusNotFound)
+		w.WriteHeader(http.StatusBadRequest)
+		model.Logger.Error("Order item not found")
+		service.ErrorHandling("Order item not found", w)
 		return
 	}
+
 	w.Header().Set("Content-type", "application/json")
 	if err = json.NewEncoder(w).Encode(item); err != nil {
 		return
 	}
 }
+
 func (o *OrderHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var updatedItem model.OrderItem
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		model.Logger.Error("Error reading request body")
+		service.ErrorHandling("Error reading request body", w)
 		return
 	}
 	if err := json.Unmarshal(body, &updatedItem); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		model.Logger.Error("Invalid JSON")
+		service.ErrorHandling("Invalid JSON", w)
 		return
 	}
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		model.Logger.Error("Invalid request path")
+		service.ErrorHandling("Invalid request path", w)
 		return
 	}
-	item, err := o.service.Update(path[2], updatedItem)
-	if err != nil {
-		http.Error(w, "Order item not found", http.StatusNotFound)
-		return
-	}
-	w.Header().Set("Content-type", "application/json")
-	if err = json.NewEncoder(w).Encode(item); err != nil {
+
+	if 	err := o.service.Update(path[2], updatedItem); err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		model.Logger.Error("Order item not found")
+		service.ErrorHandling("Order item not found", w)
 		return
 	}
 }
+
 func (o *OrderHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {

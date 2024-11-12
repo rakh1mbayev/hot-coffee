@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"hot-coffee/internal/dal"
 	"hot-coffee/internal/service"
-	"hot-coffee/models"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
-
+	
 	"hot-coffee/internal/handler"
 
 	flags "hot-coffee/models"
@@ -41,7 +40,9 @@ Options:
 	if _, err := os.Stat(*flags.Dir + "/menu.json"); err != nil { // Check if /menu.json exists if not create
 		file, err := os.Create(*flags.Dir + "/menu.json")
 		if err != nil {
+			flags.Logger.Error("Error creating menu.json in main.go -> main")
 			fmt.Println("Error creating menu.json in main.go -> main:", err)
+			return
 		}
 		defer file.Close()
 	}
@@ -49,7 +50,9 @@ Options:
 	if _, err := os.Stat(*flags.Dir + "/inventory.json"); err != nil { // Check if inventory.json exists if not create
 		file, err := os.Create(*flags.Dir + "/inventory.json")
 		if err != nil {
+			flags.Logger.Error("Error creating inventory.json in main.go -> main")
 			fmt.Println("Error creating inventory.json in main.go -> main:", err)
+			return
 		}
 		defer file.Close()
 	}
@@ -57,7 +60,9 @@ Options:
 	if _, err := os.Stat(*flags.Dir + "/orders.json"); err != nil { // Check if orders.json exists if not create
 		file, err := os.Create(*flags.Dir + "/orders.json")
 		if err != nil {
+			flags.Logger.Error("Error creating orders.json in main.go -> main")
 			fmt.Println("Error creating orders.json in main.go -> main:", err)
+			return
 		}
 		defer file.Close()
 	}
@@ -65,13 +70,16 @@ Options:
 	if _, err := os.Stat(*flags.Dir + "/report.log"); err != nil { // Check if /report.log exists if not create
 		file, err := os.Create(*flags.Dir + "/report.log")
 		if err != nil {
+			flags.Logger.Error("Error creating report.log in main.go -> main")
 			fmt.Println("Error creating report.log in main.go -> main:", err)
+			return
 		}
 		defer file.Close()
 	}
 
 	file, err := os.OpenFile(*flags.Dir+"/report.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 	if err != nil {
+		flags.Logger.Error("Error opening file in: main.go.go -> main")
 		fmt.Println("Error opening file in: main.go.go -> main", err)
 		return
 	}
@@ -94,7 +102,7 @@ Options:
 
 	// menu
 	// need finish first
-	menuDal := dal.NewMenuRepo(*models.Dir + "/menu.json")
+	menuDal := dal.NewMenuRepo(*flags.Dir + "/menu.json")
 	menuService := service.NewFileMenuService(menuDal)
 	menuHandler := handler.NewMenuHandler(menuService)
 
@@ -106,7 +114,7 @@ Options:
 
 	// inventory
 	// need finish second
-	inventoryDal := dal.NewInventoryRepo(*models.Dir + "/inventory.json")
+	inventoryDal := dal.NewInventoryRepo(*flags.Dir + "/inventory.json")
 	inventoryService := service.NewInventoryService(inventoryDal)
 	inventoryHandler := handler.NewInventoryHandler(inventoryService)
 

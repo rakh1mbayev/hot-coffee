@@ -9,7 +9,7 @@ type OrdersService interface {
 	Add(item model.OrderItem) error
 	Get() ([]model.OrderItem, error)
 	GetByID(id string) (*model.OrderItem, error)
-	Update(id string, item model.OrderItem) (*model.OrderItem, error)
+	Update(id string, item model.OrderItem) error
 	Delete(id string) error
 	Close(id string) error
 }
@@ -36,8 +36,8 @@ func (o *FileOrderService) GetByID(id string) (*model.OrderItem, error) {
 	return nil, nil
 }
 
-func (o *FileOrderService) Update(id string, item model.OrderItem) (*model.OrderItem, error) {
-	return nil, nil
+func (o *FileOrderService) Update(id string, item model.OrderItem) error {
+	return nil
 }
 
 func (o *FileOrderService) Delete(id string) error {

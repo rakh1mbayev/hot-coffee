@@ -22,10 +22,9 @@ func NewFileMenuService(dataAccess dal.MenuDalInterface) *FileMenuService {
 	return &FileMenuService{dataAccess: dataAccess}
 }
 
-func (f *FileMenuService) PostMenu(item model.MenuItem) error {
+func (f *FileMenuService) Add(item model.MenuItem) error {
 	if item.ID == "" {
 		fmt.Println("Menu ID can not be empty")
-		model.Logger.Error("Menu ID can not be empty")
 		return nil
 	}
 

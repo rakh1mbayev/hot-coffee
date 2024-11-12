@@ -2,10 +2,8 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"hot-coffee/internal/service"
 	"hot-coffee/models"
-	"io"
 	"io"
 	"net/http"
 	"strings"
@@ -34,7 +32,10 @@ func (h *InventoryHandler) Add(w http.ResponseWriter, r *http.Request) {
 func (h *InventoryHandler) Get(w http.ResponseWriter, r *http.Request) {
 	items, err := h.inventoryService.Get()
 	if err != nil {
-		http.Error(w, "Failed to load inventory", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		models.Logger.Error("Failed to load inventory")
+		service.ErrorHandling("Failed to load inventory", w)
+
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
@@ -46,12 +47,16 @@ func (h *InventoryHandler) Get(w http.ResponseWriter, r *http.Request) {
 func (h *InventoryHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		models.Logger.Error("Invalid request path")
+		service.ErrorHandling("Invalid request path", w)
 		return
 	}
 	item, err := h.inventoryService.GetByID(path[2])
 	if err != nil {
-		http.Error(w, "Inventory item not found", http.StatusNotFound)
+		w.WriteHeader(http.StatusNotFound)
+		models.Logger.Error("Inventory item not found")
+		service.ErrorHandling("Inventory item not found", w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
@@ -64,20 +69,33 @@ func (h *InventoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var updatedItem models.InventoryItem
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		models.Logger.Error("Error reading request body")
+		service.ErrorHandling("Error reading request body", w)
 		return
 	}
 	if err := json.Unmarshal(body, &updatedItem); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		models.Logger.Error("Invalid JSON")
+		service.ErrorHandling("Invalid JSON", w)
 		return
 	}
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		models.Logger.Error("Invalid request path")
+		service.ErrorHandling("Invalid request path", w)
 		return
 	}
-	if err = h.inventoryService.Update(path[2], updatedItem); err != nil {
-		http.Error(w, "Inventory item not found", http.StatusNotFound)
+	item, err := h.inventoryService.Update(path[2], updatedItem)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		models.Logger.Error("Menu item not found")
+		service.ErrorHandling("Menu item not found", w)
+		return
+	}
+	w.Header().Set("Content-type", "application/json")
+	if err = json.NewEncoder(w).Encode(item); err != nil {
 		return
 	}
 }
@@ -86,7 +104,9 @@ func (h *InventoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
 	if err := h.inventoryService.Delete(id); err != nil {
-		http.Error(w, "Inventory item not found", http.StatusNotFound)
+		w.WriteHeader(http.StatusNotFound)
+		models.Logger.Error("Inventory item not found")
+		service.ErrorHandling("Inventory item not found", w)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
