@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"hot-coffee/internal/dal"
 	"hot-coffee/models"
 )
@@ -8,7 +9,7 @@ import (
 type InventoryServiceInterface interface {
 	Add(models.InventoryItem) error
 	Get() ([]models.InventoryItem, error)
-	GetByID() (models.InventoryItem, error)
+	GetByID(id string) (models.InventoryItem, error)
 	Delete(models.InventoryItem) error
 	Update(string, models.InventoryItem) error
 }
@@ -26,11 +27,20 @@ func (s *inventoryService) Add(models.InventoryItem) error {
 }
 
 func (s *inventoryService) Get() ([]models.InventoryItem, error) {
-	return []models.InventoryItem{}, nil
+	return s.inventoryAccess.GetAll()
 }
 
-func (s *inventoryService) GetByID() (models.InventoryItem, error) {
-	return models.InventoryItem{}, nil
+func (s *inventoryService) GetByID(id string) (models.InventoryItem, error) {
+	items, err := s.inventoryAccess.GetAll()
+	if err != nil {
+		return models.InventoryItem{}, err
+	}
+	for _, item := range items {
+		if item.IngredientID == id {
+			return item, nil
+		}
+	}
+	return models.InventoryItem{}, fmt.Errorf("menu item not found")
 }
 
 func (s *inventoryService) Delete(models.InventoryItem) error {

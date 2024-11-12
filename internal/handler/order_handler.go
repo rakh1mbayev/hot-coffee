@@ -28,7 +28,7 @@ func (o *OrderHandler) PostOrders(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-	if err := o.service.PostOrders(newOrderItem); err != nil {
+	if err := o.service.Add(newOrderItem); err != nil {
 		http.Error(w, "Failed to add order item", http.StatusInternalServerError)
 		return
 	}
@@ -36,7 +36,7 @@ func (o *OrderHandler) PostOrders(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 func (o *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
-	items, err := o.service.GetOrders()
+	items, err := o.service.Get()
 	if err != nil {
 		http.Error(w, "Failed to load orders", http.StatusInternalServerError)
 		return
@@ -52,7 +52,7 @@ func (o *OrderHandler) GetOrdersID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
 		return
 	}
-	item, err := o.service.GetOrdersID(path[2])
+	item, err := o.service.GetByID(path[2])
 	if err != nil {
 		http.Error(w, "Order item not found", http.StatusNotFound)
 		return
@@ -78,7 +78,7 @@ func (o *OrderHandler) PutOrdersID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
 		return
 	}
-	item, err := o.service.PutOrdersID(path[2], updatedItem)
+	item, err := o.service.Update(path[2], updatedItem)
 	if err != nil {
 		http.Error(w, "Order item not found", http.StatusNotFound)
 		return
@@ -94,7 +94,7 @@ func (o *OrderHandler) DeleteOrdersID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
 		return
 	}
-	err := o.service.DeleteOrdersID(path[2])
+	err := o.service.Delete(path[2])
 	if err != nil {
 		http.Error(w, "Order item not found", http.StatusNotFound)
 		return
@@ -109,7 +109,7 @@ func (o *OrderHandler) PostOrdersIDnClose(w http.ResponseWriter, r *http.Request
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
 		return
 	}
-	err := o.service.PostOrdersIDnClose(path[2])
+	err := o.service.Close(path[2])
 	if err != nil {
 		http.Error(w, "Order item not found", http.StatusNotFound)
 		return

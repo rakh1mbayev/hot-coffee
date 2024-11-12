@@ -7,11 +7,11 @@ import (
 )
 
 type MenuService interface {
-	PostMenu(item model.MenuItem) error
-	GetMenu() ([]model.MenuItem, error)
-	GetMenuItemByID(id string) (*model.MenuItem, error)
-	PutMenuItem(id string, item model.MenuItem) (*model.MenuItem, error)
-	DeleteMenuItem(id string) error
+	Add(item model.MenuItem) error
+	Get() ([]model.MenuItem, error)
+	GetByID(id string) (*model.MenuItem, error)
+	Update(id string, item model.MenuItem) (*model.MenuItem, error)
+	Delete(id string) error
 }
 
 type FileMenuService struct {
@@ -22,7 +22,7 @@ func NewFileMenuService(dataAccess dal.MenuDalInterface) *FileMenuService {
 	return &FileMenuService{dataAccess: dataAccess}
 }
 
-func (f *FileMenuService) PostMenu(item model.MenuItem) error {
+func (f *FileMenuService) Add(item model.MenuItem) error {
 	items, err := f.dataAccess.LoadMenuItems()
 	if err != nil {
 		return err
@@ -31,11 +31,11 @@ func (f *FileMenuService) PostMenu(item model.MenuItem) error {
 	return f.dataAccess.SaveMenuItems(items)
 }
 
-func (f *FileMenuService) GetMenu() ([]model.MenuItem, error) {
+func (f *FileMenuService) Get() ([]model.MenuItem, error) {
 	return f.dataAccess.LoadMenuItems()
 }
 
-func (f *FileMenuService) GetMenuItemByID(id string) (*model.MenuItem, error) {
+func (f *FileMenuService) GetByID(id string) (*model.MenuItem, error) {
 	items, err := f.dataAccess.LoadMenuItems()
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func (f *FileMenuService) GetMenuItemByID(id string) (*model.MenuItem, error) {
 	return nil, fmt.Errorf("menu item not found")
 }
 
-func (f *FileMenuService) PutMenuItem(id string, item model.MenuItem) (*model.MenuItem, error) {
+func (f *FileMenuService) Update(id string, item model.MenuItem) (*model.MenuItem, error) {
 	items, err := f.dataAccess.LoadMenuItems()
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (f *FileMenuService) PutMenuItem(id string, item model.MenuItem) (*model.Me
 	return nil, fmt.Errorf("menu item not found")
 }
 
-func (f *FileMenuService) DeleteMenuItem(id string) error {
+func (f *FileMenuService) Delete(id string) error {
 	items, err := f.dataAccess.LoadMenuItems()
 	if err != nil {
 		return err

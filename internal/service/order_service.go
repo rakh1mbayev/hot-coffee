@@ -6,12 +6,12 @@ import (
 )
 
 type OrdersService interface {
-	PostOrders(item model.OrderItem) error
-	GetOrders() ([]model.OrderItem, error)
-	GetOrdersID(id string) (*model.OrderItem, error)
-	PutOrdersID(id string, item model.OrderItem) (*model.OrderItem, error)
-	DeleteOrdersID(id string) error
-	PostOrdersIDnClose(id string) error
+	Add(item model.OrderItem) error
+	Get() ([]model.OrderItem, error)
+	GetByID(id string) (*model.OrderItem, error)
+	Update(id string, item model.OrderItem) (*model.OrderItem, error)
+	Delete(id string) error
+	Close(id string) error
 }
 
 type FileOrderService struct {
@@ -24,26 +24,26 @@ func NewFileOrderService(filePath string) *FileOrderService {
 	}
 }
 
-func (o *FileOrderService) PostOrders(item model.OrderItem) error {
+func (o *FileOrderService) Add(item model.OrderItem) error {
 	return nil
 }
 
-func (o *FileOrderService) GetOrders() ([]model.OrderItem, error) {
+func (o *FileOrderService) Get() ([]model.OrderItem, error) {
 	return nil, nil
 }
 
-func (o *FileOrderService) GetOrdersID(id string) (*model.OrderItem, error) {
+func (o *FileOrderService) GetByID(id string) (*model.OrderItem, error) {
 	return nil, nil
 }
 
-func (o *FileOrderService) PutOrdersID(id string, item model.OrderItem) (*model.OrderItem, error) {
+func (o *FileOrderService) Update(id string, item model.OrderItem) (*model.OrderItem, error) {
 	return nil, nil
 }
 
-func (o *FileOrderService) DeleteOrdersID(id string) error {
+func (o *FileOrderService) Delete(id string) error {
 	return nil
 }
 
-func (o *FileOrderService) PostOrdersIDnClose(id string) error {
+func (o *FileOrderService) Close(id string) error {
 	return nil
 }
