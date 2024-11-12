@@ -43,7 +43,9 @@ func (m *MenuHandler) GetMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
-	json.NewEncoder(w).Encode(items)
+	if err = json.NewEncoder(w).Encode(items); err != nil {
+		return
+	}
 }
 
 func (m *MenuHandler) GetMenuItemByID(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +60,9 @@ func (m *MenuHandler) GetMenuItemByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
-	json.NewEncoder(w).Encode(item)
+	if err = json.NewEncoder(w).Encode(item); err != nil {
+		return
+	}
 }
 
 func (m *MenuHandler) PutMenuItem(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +87,9 @@ func (m *MenuHandler) PutMenuItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
-	json.NewEncoder(w).Encode(item)
+	if err = json.NewEncoder(w).Encode(item); err != nil {
+		return
+	}
 }
 
 func (m *MenuHandler) DeleteMenuItem(w http.ResponseWriter, r *http.Request) {

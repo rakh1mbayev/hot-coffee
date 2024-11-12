@@ -2,16 +2,30 @@ package dal
 
 import (
 	"encoding/json"
-	"log"
+	model "hot-coffee/models"
 	"os"
-
-	"hot-coffee/models"
 )
 
-func OrderPost(order models.Order) {
-	writeJson, _ := json.MarshalIndent(order, "", "\t") // from txt to json
-	err := os.WriteFile(*models.Dir + "/orders.json", writeJson, 0o644)
+type OrderDataAccess struct {
+	FilePath string
+}
+
+func (f *OrderDataAccess) LoadOrderItems() ([]model.OrderItem, error) {
+	file, err := os.ReadFile(f.FilePath)
 	if err != nil {
-		log.Fatalf("Error writing json file in: order_repository.go -> OrderPost %v", err)
+		return nil, err
 	}
+	var items []model.OrderItem
+	if err := json.Unmarshal(file, &items); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (f *OrderDataAccess) SaveOrderItems(items []model.OrderItem) error {
+	fileData, err := json.Marshal(items)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(f.FilePath, fileData, 0644)
 }

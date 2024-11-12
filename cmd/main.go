@@ -78,14 +78,17 @@ Options:
 
 	mux := http.NewServeMux()
 
+	ordersService := service.NewFileOrderService(*flags.Dir + "/menu.json")
+	ordersHandler := handler.NewOrdersHandler(ordersService)
+
 	// orders
 	// need finish the last
-	mux.HandleFunc("POST /orders", handler.PostOrders)
-	mux.HandleFunc("GET /orders", handler.GetOrders)
-	mux.HandleFunc("GET /orders/{id}", handler.GetOrdersID)
-	mux.HandleFunc("PUT /orders/{id}", handler.PutOrdersID)
-	mux.HandleFunc("DELETE /orders/{id}", handler.DeleteOrdersID)
-	mux.HandleFunc("POST /orders/{id}/close", handler.PostOrdersIDClose)
+	mux.HandleFunc("POST /orders", ordersHandler.PostOrders)
+	mux.HandleFunc("GET /orders", ordersHandler.GetOrders)
+	mux.HandleFunc("GET /orders/{id}", ordersHandler.GetOrdersID)
+	mux.HandleFunc("PUT /orders/{id}", ordersHandler.PutOrdersID)
+	mux.HandleFunc("DELETE /orders/{id}", ordersHandler.DeleteOrdersID)
+	mux.HandleFunc("POST /orders/{id}/close", ordersHandler.PostOrdersIDnClose)
 
 	// menu
 	// need finish first
