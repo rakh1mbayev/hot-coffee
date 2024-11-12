@@ -3,13 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
+	"hot-coffee/internal/dal"
 	"hot-coffee/internal/service"
+	"hot-coffee/models"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 
-	handler "hot-coffee/internal/handler"
+	"hot-coffee/internal/handler"
 
 	flags "hot-coffee/models"
 )
@@ -89,8 +91,8 @@ Options:
 
 	// menu
 	// need finish first
-
-	menuService := service.NewFileMenuService(*flags.Dir + "/menu.json")
+	menuDal := dal.NewMenuRepo(*models.Dir + "/menu.json")
+	menuService := service.NewFileMenuService(menuDal)
 	menuHandler := handler.NewMenuHandler(menuService)
 
 	mux.HandleFunc("POST /menu", menuHandler.PostMenu)

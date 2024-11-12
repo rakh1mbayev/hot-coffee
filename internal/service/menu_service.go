@@ -15,13 +15,11 @@ type MenuService interface {
 }
 
 type FileMenuService struct {
-	dataAccess *dal.FileDataAccess
+	dataAccess dal.MenuDalInterface
 }
 
-func NewFileMenuService(filePath string) *FileMenuService {
-	return &FileMenuService{
-		dataAccess: &dal.FileDataAccess{FilePath: filePath},
-	}
+func NewFileMenuService(dataAccess dal.MenuDalInterface) *FileMenuService {
+	return &FileMenuService{dataAccess: dataAccess}
 }
 
 func (f *FileMenuService) PostMenu(item model.MenuItem) error {

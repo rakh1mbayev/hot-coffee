@@ -6,12 +6,21 @@ import (
 	"os"
 )
 
+type MenuDalInterface interface {
+	LoadMenuItems() ([]model.MenuItem, error)
+	SaveMenuItems(items []model.MenuItem) error
+}
+
 type FileDataAccess struct {
-	FilePath string
+	filePath string
+}
+
+func NewMenuRepo(filePath string) *FileDataAccess {
+	return &FileDataAccess{filePath: filePath}
 }
 
 func (f *FileDataAccess) LoadMenuItems() ([]model.MenuItem, error) {
-	file, err := os.ReadFile(f.FilePath)
+	file, err := os.ReadFile(f.filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -27,5 +36,5 @@ func (f *FileDataAccess) SaveMenuItems(items []model.MenuItem) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(f.FilePath, fileData, 0644)
+	return os.WriteFile(f.filePath, fileData, 0644)
 }
