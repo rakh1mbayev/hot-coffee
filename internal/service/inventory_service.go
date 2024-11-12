@@ -1,22 +1,14 @@
 package service
 
-// type InventoryInterface interface {
-// 	Create(model.InventoryItem) error
-// 	Get()
-// 	Update()
-// 	Delete()
-// }
+import "hot-coffee/internal/dal"
 
+type InventoryServiceInterface interface {
+}
 
-// type inventroyService struct{
+type inventoryService struct {
+	inventoryAccess dal.InventoryDalInterface
+}
 
-// }
-
-// func (s *inventroyService) Create(model.InventoryItem) error{
-
-// }
-
-// Create()
-// Get()
-// Update()
-// Delete()
+func NewInventoryService(inventoryDal dal.InventoryDalInterface) *inventoryService {
+	return &inventoryService{inventoryAccess: inventoryDal}
+}

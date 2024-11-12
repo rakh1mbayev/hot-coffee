@@ -103,11 +103,15 @@ Options:
 
 	// inventory
 	// need finish second
-	mux.HandleFunc("POST /inventory", handler.PostInventory)
-	mux.HandleFunc("GET /inventory", handler.GetInventory)
-	mux.HandleFunc("GET /inventory/{id}", handler.GetInventoryID)
-	mux.HandleFunc("PUT /inventory/{id}", handler.PutInventoryID)
-	mux.HandleFunc("DELETE /inventory/{id}", handler.DeleteInventoryID)
+	inventoryDal := dal.NewInventoryRepo(*models.Dir + "/inventory.json")
+	inventoryService := service.NewInventoryService(inventoryDal)
+	inventoryHandler := handler.NewInventoryHandler(inventoryService)
+
+	mux.HandleFunc("POST /inventory", inventoryHandler.PostInventory)
+	mux.HandleFunc("GET /inventory", inventoryHandler.GetInventory)
+	mux.HandleFunc("GET /inventory/{id}", inventoryHandler.GetInventoryID)
+	mux.HandleFunc("PUT /inventory/{id}", inventoryHandler.PutInventoryID)
+	mux.HandleFunc("DELETE /inventory/{id}", inventoryHandler.DeleteInventoryID)
 
 	// reports
 	mux.HandleFunc("GET /reports/total-sales", handler.GetTotalSales)

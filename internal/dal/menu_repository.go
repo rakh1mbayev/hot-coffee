@@ -32,9 +32,10 @@ func (f *FileDataAccess) LoadMenuItems() ([]model.MenuItem, error) {
 }
 
 func (f *FileDataAccess) SaveMenuItems(items []model.MenuItem) error {
-	fileData, err := json.Marshal(items)
+	fileData, err := json.MarshalIndent(items, "", "\t")
 	if err != nil {
 		return err
 	}
+
 	return os.WriteFile(f.filePath, fileData, 0644)
 }
