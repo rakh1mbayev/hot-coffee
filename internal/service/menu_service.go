@@ -10,7 +10,7 @@ type MenuService interface {
 	Add(item model.MenuItem) error
 	Get() ([]model.MenuItem, error)
 	GetByID(id string) (*model.MenuItem, error)
-	Update(id string, item model.MenuItem) (*model.MenuItem, error)
+	Update(id string, item model.MenuItem) error
 	Delete(id string) error
 }
 
@@ -23,20 +23,20 @@ func NewFileMenuService(dataAccess dal.MenuDalInterface) *FileMenuService {
 }
 
 func (f *FileMenuService) Add(item model.MenuItem) error {
-	items, err := f.dataAccess.LoadMenuItems()
+	items, err := f.dataAccess.GetAll()
 	if err != nil {
 		return err
 	}
 	items = append(items, item)
-	return f.dataAccess.SaveMenuItems(items)
+	return f.dataAccess.Save(items)
 }
 
 func (f *FileMenuService) Get() ([]model.MenuItem, error) {
-	return f.dataAccess.LoadMenuItems()
+	return f.dataAccess.GetAll()
 }
 
 func (f *FileMenuService) GetByID(id string) (*model.MenuItem, error) {
-	items, err := f.dataAccess.LoadMenuItems()
+	items, err := f.dataAccess.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -48,33 +48,36 @@ func (f *FileMenuService) GetByID(id string) (*model.MenuItem, error) {
 	return nil, fmt.Errorf("menu item not found")
 }
 
-func (f *FileMenuService) Update(id string, item model.MenuItem) (*model.MenuItem, error) {
-	items, err := f.dataAccess.LoadMenuItems()
+func (f *FileMenuService) Update(id string, item model.MenuItem) error {
+	items, err := f.dataAccess.GetAll()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	for i, existingItem := range items {
 		if existingItem.ID == id {
 			items[i] = item
-			if err := f.dataAccess.SaveMenuItems(items); err != nil {
-				return nil, err
-			}
-			return &item, nil
+			return f.dataAccess.Save(items)
 		}
 	}
-	return nil, fmt.Errorf("menu item not found")
+	return fmt.Errorf("menu item not found")
 }
 
 func (f *FileMenuService) Delete(id string) error {
-	items, err := f.dataAccess.LoadMenuItems()
+	items, err := f.dataAccess.GetAll()
 	if err != nil {
 		return err
 	}
+	found := false
 	var updatedItems []model.MenuItem
 	for _, item := range items {
 		if item.ID != id {
 			updatedItems = append(updatedItems, item)
+		} else {
+			found = true
 		}
 	}
-	return f.dataAccess.SaveMenuItems(updatedItems)
+	if !found {
+		return fmt.Errorf("menu item not found")
+	}
+	return f.dataAccess.Save(updatedItems)
 }

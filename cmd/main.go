@@ -80,7 +80,7 @@ Options:
 
 	mux := http.NewServeMux()
 
-	ordersService := service.NewFileOrderService(*flags.Dir + "/menu.json")
+	ordersService := service.NewFileOrderService(*flags.Dir + "/orders.json")
 	ordersHandler := handler.NewOrdersHandler(ordersService)
 
 	// orders

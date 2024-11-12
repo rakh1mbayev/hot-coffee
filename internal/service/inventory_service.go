@@ -6,32 +6,32 @@ import (
 	"hot-coffee/models"
 )
 
-type InventoryServiceInterface interface {
+type InventoryInterface interface {
 	Add(models.InventoryItem) error
 	Get() ([]models.InventoryItem, error)
 	GetByID(id string) (models.InventoryItem, error)
-	Delete(string) error
 	Update(string, models.InventoryItem) error
+	Delete(string) error
 }
 
-type inventoryService struct {
-	inventoryAccess dal.InventoryDalInterface
+type FileInventoryService struct {
+	dataAccess dal.InventoryDalInterface
 }
 
-func NewInventoryService(inventoryDal dal.InventoryDalInterface) *inventoryService {
-	return &inventoryService{inventoryAccess: inventoryDal}
+func NewInventoryService(inventoryDal dal.InventoryDalInterface) *FileInventoryService {
+	return &FileInventoryService{dataAccess: inventoryDal}
 }
 
-func (s *inventoryService) Add(models.InventoryItem) error {
+func (s *FileInventoryService) Add(models.InventoryItem) error {
 	return nil
 }
 
-func (s *inventoryService) Get() ([]models.InventoryItem, error) {
-	return s.inventoryAccess.GetAll()
+func (s *FileInventoryService) Get() ([]models.InventoryItem, error) {
+	return s.dataAccess.GetAll()
 }
 
-func (s *inventoryService) GetByID(id string) (models.InventoryItem, error) {
-	items, err := s.inventoryAccess.GetAll()
+func (s *FileInventoryService) GetByID(id string) (models.InventoryItem, error) {
+	items, err := s.dataAccess.GetAll()
 	if err != nil {
 		return models.InventoryItem{}, err
 	}
@@ -43,12 +43,12 @@ func (s *inventoryService) GetByID(id string) (models.InventoryItem, error) {
 	return models.InventoryItem{}, fmt.Errorf("menu item not found")
 }
 
-func (s *inventoryService) Update(string, models.InventoryItem) error {
+func (s *FileInventoryService) Update(string, models.InventoryItem) error {
 	return nil
 }
 
-func (s *inventoryService) Delete(id string) error {
-	items, err := s.inventoryAccess.GetAll()
+func (s *FileInventoryService) Delete(id string) error {
+	items, err := s.dataAccess.GetAll()
 	if err != nil {
 		return err
 	}
@@ -58,5 +58,5 @@ func (s *inventoryService) Delete(id string) error {
 			updatedItems = append(updatedItems, item)
 		}
 	}
-	return s.inventoryAccess.SaveInventoryItems(items)
+	return s.dataAccess.Save(items)
 }

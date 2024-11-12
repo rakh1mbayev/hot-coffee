@@ -78,15 +78,11 @@ func (o *OrderHandler) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
 		return
 	}
-	item, err := o.service.Update(path[2], updatedItem)
-	if err != nil {
+	if err := o.service.Update(path[2], updatedItem); err != nil {
 		http.Error(w, "Order item not found", http.StatusNotFound)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
-	if err = json.NewEncoder(w).Encode(item); err != nil {
-		return
-	}
 }
 func (o *OrderHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
