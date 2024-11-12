@@ -120,7 +120,7 @@ Options:
 	mux.HandleFunc("GET /reports/total-sales", handler.GetTotalSales)
 	mux.HandleFunc("GET /reports/popular-items", handler.GetPopularItems)
 
-	log.Fatal(http.ListenAndServe(":7070", mux))
+	log.Fatal(http.ListenAndServe(*flags.Port, mux))
 
 	// WE NEED INTERFACE
 }

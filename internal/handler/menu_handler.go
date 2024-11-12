@@ -72,13 +72,8 @@ func (m *MenuHandler) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
 		return
 	}
-	item, err := m.service.Update(path[2], updatedItem)
-	if err != nil {
+	if err := m.service.Update(path[2], updatedItem); err != nil {
 		http.Error(w, "Menu item not found", http.StatusNotFound)
-		return
-	}
-	w.Header().Set("Content-type", "application/json")
-	if err = json.NewEncoder(w).Encode(item); err != nil {
 		return
 	}
 }
