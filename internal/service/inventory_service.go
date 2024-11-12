@@ -6,20 +6,22 @@ import (
 	"hot-coffee/models"
 )
 
-type InventoryServiceInterface interface {
+type InventoryInterface interface {
 	Add(models.InventoryItem) error
 	Get() ([]models.InventoryItem, error)
 	GetByID(id string) (models.InventoryItem, error)
+	Update(string, models.InventoryItem) error
+	Delete(string) error
 	Delete(string) error
 	Update(string, models.InventoryItem) (*models.InventoryItem ,error)
 }
 
-type inventoryService struct {
-	inventoryAccess dal.InventoryDalInterface
+type FileInventoryService struct {
+	dataAccess dal.InventoryDalInterface
 }
 
-func NewInventoryService(inventoryDal dal.InventoryDalInterface) *inventoryService {
-	return &inventoryService{inventoryAccess: inventoryDal}
+func NewInventoryService(inventoryDal dal.InventoryDalInterface) *FileInventoryService {
+	return &FileInventoryService{dataAccess: inventoryDal}
 }
 
 func (s *inventoryService) Add(newInventoryItem models.InventoryItem) error {
@@ -63,12 +65,12 @@ func (s *inventoryService) Add(newInventoryItem models.InventoryItem) error {
 	return s.inventoryAccess.SaveInventoryItems(items)
 }
 
-func (s *inventoryService) Get() ([]models.InventoryItem, error) {
-	return s.inventoryAccess.GetAll()
+func (s *FileInventoryService) Get() ([]models.InventoryItem, error) {
+	return s.dataAccess.GetAll()
 }
 
-func (s *inventoryService) GetByID(id string) (models.InventoryItem, error) {
-	items, err := s.inventoryAccess.GetAll()
+func (s *FileInventoryService) GetByID(id string) (models.InventoryItem, error) {
+	items, err := s.dataAccess.GetAll()
 	if err != nil {
 		return models.InventoryItem{}, err
 	}
@@ -97,8 +99,8 @@ func (s *inventoryService) Update(id string, item models.InventoryItem) (*models
 	return nil, fmt.Errorf("menu item not found")
 }
 
-func (s *inventoryService) Delete(id string) error {
-	items, err := s.inventoryAccess.GetAll()
+func (s *FileInventoryService) Delete(id string) error {
+	items, err := s.dataAccess.GetAll()
 	if err != nil {
 		return err
 	}

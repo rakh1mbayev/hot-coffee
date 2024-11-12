@@ -10,10 +10,10 @@ import (
 )
 
 type InventoryHandler struct {
-	inventoryService service.InventoryServiceInterface
+	inventoryService service.InventoryInterface
 }
 
-func NewInventoryHandler(inventoryService service.InventoryServiceInterface) *InventoryHandler {
+func NewInventoryHandler(inventoryService service.InventoryInterface) *InventoryHandler {
 	return &InventoryHandler{inventoryService: inventoryService}
 }
 
@@ -109,5 +109,6 @@ func (h *InventoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		service.ErrorHandling("Inventory item not found", w)
 		return
 	}
+	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusNoContent)
 }

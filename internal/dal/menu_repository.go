@@ -7,19 +7,19 @@ import (
 )
 
 type MenuDalInterface interface {
-	LoadMenuItems() ([]model.MenuItem, error)
-	SaveMenuItems(items []model.MenuItem) error
+	GetAll() ([]model.MenuItem, error)
+	Save(items []model.MenuItem) error
 }
 
-type FileDataAccess struct {
+type MenuData struct {
 	filePath string
 }
 
-func NewMenuRepo(filePath string) *FileDataAccess {
-	return &FileDataAccess{filePath: filePath}
+func NewMenuRepo(filePath string) *MenuData {
+	return &MenuData{filePath: filePath}
 }
 
-func (f *FileDataAccess) LoadMenuItems() ([]model.MenuItem, error) {
+func (f *MenuData) GetAll() ([]model.MenuItem, error) {
 	file, err := os.ReadFile(f.filePath)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (f *FileDataAccess) LoadMenuItems() ([]model.MenuItem, error) {
 	return items, nil
 }
 
-func (f *FileDataAccess) SaveMenuItems(items []model.MenuItem) error {
+func (f *MenuData) Save(items []model.MenuItem) error {
 	fileData, err := json.MarshalIndent(items, "", "\t")
 	if err != nil {
 		return err

@@ -93,10 +93,6 @@ func (m *MenuHandler) Update(w http.ResponseWriter, r *http.Request) {
 		service.ErrorHandling("Menu item not found", w)
 		return
 	}
-	w.Header().Set("Content-type", "application/json")
-	if err = json.NewEncoder(w).Encode(item); err != nil {
-		return
-	}
 }
 
 func (m *MenuHandler) Delete(w http.ResponseWriter, r *http.Request) {

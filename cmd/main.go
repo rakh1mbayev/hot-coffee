@@ -88,7 +88,7 @@ Options:
 
 	mux := http.NewServeMux()
 
-	ordersService := service.NewFileOrderService(*flags.Dir + "/menu.json")
+	ordersService := service.NewFileOrderService(*flags.Dir + "/orders.json")
 	ordersHandler := handler.NewOrdersHandler(ordersService)
 
 	// orders
@@ -128,7 +128,7 @@ Options:
 	mux.HandleFunc("GET /reports/total-sales", handler.GetTotalSales)
 	mux.HandleFunc("GET /reports/popular-items", handler.GetPopularItems)
 
-	log.Fatal(http.ListenAndServe(":7070", mux))
+	log.Fatal(http.ListenAndServe(*flags.Port, mux))
 
 	// WE NEED INTERFACE
 }
