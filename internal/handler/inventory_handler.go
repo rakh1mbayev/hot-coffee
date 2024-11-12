@@ -1,6 +1,8 @@
 package handler
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func PostInventory(w http.ResponseWriter, r *http.Request) {
 }

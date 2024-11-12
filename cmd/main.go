@@ -3,11 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"hot-coffee/internal/service"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
 	handler "hot-coffee/internal/handler"
+
 	flags "hot-coffee/models"
 )
 
@@ -57,6 +60,22 @@ Options:
 		defer file.Close()
 	}
 
+	if _, err := os.Stat(*flags.Dir + "/report.log"); err != nil { // Check if /report.log exists if not create
+		file, err := os.Create(*flags.Dir + "/report.log")
+		if err != nil {
+			fmt.Println("Error creating report.log in main.go -> main:", err)
+		}
+		defer file.Close()
+	}
+
+	file, err := os.OpenFile(*flags.Dir+"/report.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
+	if err != nil {
+		fmt.Println("Error opening file in: main.go.go -> main", err)
+		return
+	}
+
+	flags.Logger = slog.New(slog.NewTextHandler(file, nil))
+
 	mux := http.NewServeMux()
 
 	// orders
@@ -70,11 +89,15 @@ Options:
 
 	// menu
 	// need finish first
-	mux.HandleFunc("POST /menu", handler.PostMenu)
-	mux.HandleFunc("GET /menu", handler.GetMenuHandler)
-	mux.HandleFunc("GET /menu/{id}", handler.GetMenuID)
-	mux.HandleFunc("PUT /menu/{id}", handler.PutMenuID)
-	mux.HandleFunc("DELETE /menu/{id}", handler.DeleteMenuID)
+
+	menuService := service.NewFileMenuService(*flags.Dir + "/menu.json")
+	menuHandler := handler.NewMenuHandler(menuService)
+
+	mux.HandleFunc("POST /menu", menuHandler.PostMenu)
+	mux.HandleFunc("GET /menu", menuHandler.GetMenu)
+	mux.HandleFunc("GET /menu/{id}", menuHandler.GetMenuItemByID)
+	mux.HandleFunc("PUT /menu/{id}", menuHandler.PutMenuItem)
+	mux.HandleFunc("DELETE /menu/{id}", menuHandler.DeleteMenuItem)
 
 	// inventory
 	// need finish second
@@ -89,4 +112,6 @@ Options:
 	mux.HandleFunc("GET /reports/popular-items", handler.GetPopularItems)
 
 	log.Fatal(http.ListenAndServe(":7070", mux))
+
+	// WE NEED INTERFACE
 }
