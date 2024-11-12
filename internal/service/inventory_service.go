@@ -10,7 +10,7 @@ type InventoryServiceInterface interface {
 	Add(models.InventoryItem) error
 	Get() ([]models.InventoryItem, error)
 	GetByID(id string) (models.InventoryItem, error)
-	Delete(models.InventoryItem) error
+	Delete(string) error
 	Update(string, models.InventoryItem) error
 }
 
@@ -43,6 +43,10 @@ func (s *inventoryService) GetByID(id string) (models.InventoryItem, error) {
 	return models.InventoryItem{}, fmt.Errorf("menu item not found")
 }
 
+func (s *inventoryService) Update(string, models.InventoryItem) error {
+	return nil
+}
+
 func (s *inventoryService) Delete(id string) error {
 	items, err := s.inventoryAccess.GetAll()
 	if err != nil {
@@ -55,8 +59,4 @@ func (s *inventoryService) Delete(id string) error {
 		}
 	}
 	return s.inventoryAccess.SaveInventoryItems(items)
-}
-
-func (s *inventoryService) Update(string, models.InventoryItem) error {
-	return nil
 }

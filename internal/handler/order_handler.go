@@ -17,7 +17,7 @@ func NewOrdersHandler(service service.OrdersService) *OrderHandler {
 	return &OrderHandler{service: service}
 }
 
-func (o *OrderHandler) PostOrders(w http.ResponseWriter, r *http.Request) {
+func (o *OrderHandler) Add(w http.ResponseWriter, r *http.Request) {
 	var newOrderItem model.OrderItem
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -35,7 +35,7 @@ func (o *OrderHandler) PostOrders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 }
-func (o *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
+func (o *OrderHandler) Get(w http.ResponseWriter, r *http.Request) {
 	items, err := o.service.Get()
 	if err != nil {
 		http.Error(w, "Failed to load orders", http.StatusInternalServerError)
@@ -46,7 +46,7 @@ func (o *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-func (o *OrderHandler) GetOrdersID(w http.ResponseWriter, r *http.Request) {
+func (o *OrderHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
@@ -62,7 +62,7 @@ func (o *OrderHandler) GetOrdersID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-func (o *OrderHandler) PutOrdersID(w http.ResponseWriter, r *http.Request) {
+func (o *OrderHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var updatedItem model.OrderItem
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -88,7 +88,7 @@ func (o *OrderHandler) PutOrdersID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-func (o *OrderHandler) DeleteOrdersID(w http.ResponseWriter, r *http.Request) {
+func (o *OrderHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
@@ -102,7 +102,7 @@ func (o *OrderHandler) DeleteOrdersID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusNoContent)
 }
-func (o *OrderHandler) PostOrdersIDnClose(w http.ResponseWriter, r *http.Request) {
+func (o *OrderHandler) Close(w http.ResponseWriter, r *http.Request) {
 
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
