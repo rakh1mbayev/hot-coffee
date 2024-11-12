@@ -9,9 +9,9 @@ import (
 type InventoryServiceInterface interface {
 	Add(models.InventoryItem) error
 	Get() ([]models.InventoryItem, error)
-	GetByID() (models.InventoryItem, error)
+	GetByID(string) (models.InventoryItem, error)
 	Delete(models.InventoryItem) error
-	Update(string, models.InventoryItem) (models.InventoryItem, error)
+	Update(string, models.InventoryItem) (*models.InventoryItem, error)
 }
 
 type inventoryService struct {
