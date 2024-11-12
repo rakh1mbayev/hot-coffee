@@ -1,81 +1,17 @@
 [
 	{
-		"product_id": "latte",
-		"name": "Caffe",
-		"description": "Espresso with steamed milk",
-		"price": 3.5,
-		"ingredients": [
-			{
-				"ingredient_id": "lol",
-				"quantity": 2
-			},
-			{
-				"ingredient_id": "kek",
-				"quantity": 32
-			}
-		]
-	},
-	{
-		"product_id": "coffe",
-		"name": "Caffe",
-		"description": "Espresso with steamed milk",
-		"price": 3.5,
-		"ingredients": [
-			{
-				"ingredient_id": "lol",
-				"quantity": 2
-			},
-			{
-				"ingredient_id": "kek",
-				"quantity": 32
-			}
-		]
-	},
-	{
-		"product_id": "fanta",
-		"name": "soda",
-		"description": "Sweete drink",
-		"price": 1.2,
-		"ingredients": [
-			{
-				"ingredient_id": "Sugar",
-				"quantity": 2
-			},
-			{
-				"ingredient_id": "Water",
-				"quantity": 5
-			}
-		]
-	},
-	{
 		"product_id": "cola",
-		"name": "soda",
-		"description": "Sweete drink",
-		"price": 1.2,
+		"name": "Caffe",
+		"description": "Espresso with steamed milk",
+		"price": 3.5,
 		"ingredients": [
 			{
-				"ingredient_id": "Sugar",
+				"ingredient_id": "lol",
 				"quantity": 2
 			},
 			{
-				"ingredient_id": "Water",
-				"quantity": 5
-			}
-		]
-	},
-	{
-		"product_id": "pepsi",
-		"name": "soda",
-		"description": "Sweete drink",
-		"price": 1.2,
-		"ingredients": [
-			{
-				"ingredient_id": "Sugar",
-				"quantity": 2
-			},
-			{
-				"ingredient_id": "Water",
-				"quantity": 5
+				"ingredient_id": "kek",
+				"quantity": 32
 			}
 		]
 	}

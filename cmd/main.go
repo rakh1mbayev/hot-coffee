@@ -3,14 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
+	"hot-coffee/internal/dal"
+	"hot-coffee/internal/service"
+	"hot-coffee/models"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 
-	"hot-coffee/internal/dal"
-	handler "hot-coffee/internal/handler"
-	"hot-coffee/internal/service"
+	"hot-coffee/internal/handler"
+
 	flags "hot-coffee/models"
 )
 
@@ -78,38 +80,41 @@ Options:
 
 	mux := http.NewServeMux()
 
+	ordersService := service.NewFileOrderService(*flags.Dir + "/menu.json")
+	ordersHandler := handler.NewOrdersHandler(ordersService)
+
 	// orders
 	// need finish the last
-	mux.HandleFunc("POST /orders", handler.PostOrders)
-	mux.HandleFunc("GET /orders", handler.GetOrders)
-	mux.HandleFunc("GET /orders/{id}", handler.GetOrdersID)
-	mux.HandleFunc("PUT /orders/{id}", handler.PutOrdersID)
-	mux.HandleFunc("DELETE /orders/{id}", handler.DeleteOrdersID)
-	mux.HandleFunc("POST /orders/{id}/close", handler.PostOrdersIDClose)
+	mux.HandleFunc("POST /orders", ordersHandler.PostOrders)
+	mux.HandleFunc("GET /orders", ordersHandler.GetOrders)
+	mux.HandleFunc("GET /orders/{id}", ordersHandler.GetOrdersID)
+	mux.HandleFunc("PUT /orders/{id}", ordersHandler.PutOrdersID)
+	mux.HandleFunc("DELETE /orders/{id}", ordersHandler.DeleteOrdersID)
+	mux.HandleFunc("POST /orders/{id}/close", ordersHandler.PostOrdersIDnClose)
 
 	// menu
 	// need finish first
-	dal_menu := dal.NewMenuRepo(*flags.Dir + "/menu.json")
-	serve_menu := service.NewDefault_servmenu(dal_menu)
-	menu_handler := handler.NewMenuHandler(serve_menu)
+	menuDal := dal.NewMenuRepo(*models.Dir + "/menu.json")
+	menuService := service.NewFileMenuService(menuDal)
+	menuHandler := handler.NewMenuHandler(menuService)
 
-	mux.HandleFunc("POST /menu", menu_handler.PostMenu)
-	mux.HandleFunc("GET /menu", handler.GetMenuHandler)
-	mux.HandleFunc("GET /menu/{id}", handler.GetMenuID)
-	mux.HandleFunc("PUT /menu/{id}", handler.PutMenuID)
-	mux.HandleFunc("DELETE /menu/{id}", handler.DeleteMenuID)
+	mux.HandleFunc("POST /menu", menuHandler.PostMenu)
+	mux.HandleFunc("GET /menu", menuHandler.GetMenu)
+	mux.HandleFunc("GET /menu/{id}", menuHandler.GetMenuItemByID)
+	mux.HandleFunc("PUT /menu/{id}", menuHandler.PutMenuItem)
+	mux.HandleFunc("DELETE /menu/{id}", menuHandler.DeleteMenuItem)
 
 	// inventory
 	// need finish second
-	dal_inventory := dal.NewInventoryRepo(*flags.Dir + "/inventory.json")
-	serve_inventory := service.NewDefault_servinventory(dal_inventory)
-	inventory_handler := handler.NewInventoryHandler(serve_inventory)
+	inventoryDal := dal.NewInventoryRepo(*models.Dir + "/inventory.json")
+	inventoryService := service.NewInventoryService(inventoryDal)
+	inventoryHandler := handler.NewInventoryHandler(inventoryService)
 
-	mux.HandleFunc("POST /inventory", inventory_handler.PostInventory)
-	mux.HandleFunc("GET /inventory", handler.GetInventory)
-	mux.HandleFunc("GET /inventory/{id}", handler.GetInventoryID)
-	mux.HandleFunc("PUT /inventory/{id}", handler.PutInventoryID)
-	mux.HandleFunc("DELETE /inventory/{id}", handler.DeleteInventoryID)
+	mux.HandleFunc("POST /inventory", inventoryHandler.PostInventory)
+	mux.HandleFunc("GET /inventory", inventoryHandler.GetInventory)
+	mux.HandleFunc("GET /inventory/{id}", inventoryHandler.GetInventoryID)
+	mux.HandleFunc("PUT /inventory/{id}", inventoryHandler.PutInventoryID)
+	mux.HandleFunc("DELETE /inventory/{id}", inventoryHandler.DeleteInventoryID)
 
 	// reports
 	mux.HandleFunc("GET /reports/total-sales", handler.GetTotalSales)

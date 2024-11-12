@@ -1,32 +1,38 @@
 package handler
 
 import (
-	"net/http"
-
+	"encoding/json"
 	"hot-coffee/internal/service"
+	"hot-coffee/models"
+	"net/http"
 )
 
-type Inventory_handle interface{}
-
-type Inventoryhandler struct {
-	Inventory_serve service.Inventory_serv
+type InventoryHandler struct {
+	inventoryService service.InventoryServiceInterface
 }
 
-func NewInventoryHandler(Inventory_serve *service.Inventory_serv) *Inventoryhandler {
-	return &Inventoryhandler{Inventory_serve: *Inventory_serve}
+func NewInventoryHandler(inventoryService service.InventoryServiceInterface) *InventoryHandler {
+	return &InventoryHandler{inventoryService: inventoryService}
 }
 
-func (i Inventoryhandler) PostInventory(w http.ResponseWriter, r *http.Request) {
+func (h *InventoryHandler) PostInventory(w http.ResponseWriter, r *http.Request) {
+	var newInventoryItem models.InventoryItem
+	json.NewDecoder(r.Body).Decode(&newInventoryItem)
+	h.inventoryService.Add(newInventoryItem)
 }
 
-func GetInventory(w http.ResponseWriter, r *http.Request) {
+func (h *InventoryHandler) GetInventory(w http.ResponseWriter, r *http.Request) {
+
 }
 
-func GetInventoryID(w http.ResponseWriter, r *http.Request) {
+func (h *InventoryHandler) GetInventoryID(w http.ResponseWriter, r *http.Request) {
+
 }
 
-func PutInventoryID(w http.ResponseWriter, r *http.Request) {
+func (h *InventoryHandler) PutInventoryID(w http.ResponseWriter, r *http.Request) {
+
 }
 
-func DeleteInventoryID(w http.ResponseWriter, r *http.Request) {
+func (h *InventoryHandler) DeleteInventoryID(w http.ResponseWriter, r *http.Request) {
+
 }

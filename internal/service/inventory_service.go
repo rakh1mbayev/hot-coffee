@@ -1,16 +1,42 @@
 package service
 
-import "hot-coffee/internal/dal"
+import (
+	"hot-coffee/internal/dal"
+	"hot-coffee/models"
+)
 
-type Serv_inventory interface{
-
+type InventoryServiceInterface interface {
+	Add(models.InventoryItem) error
+	Get() ([]models.InventoryItem, error)
+	GetByID() (models.InventoryItem, error)
+	Delete(models.InventoryItem) error
+	Update(string, models.InventoryItem) error
 }
 
-type Inventory_serv struct {
-	inventory_dal dal.Inventory_dal
+type inventoryService struct {
+	inventoryAccess dal.InventoryDalInterface
 }
 
-func NewDefault_servinventory(inventory_dal *dal.Inventory_dal) *Inventory_serv {
-	return &Inventory_serv{inventory_dal: *inventory_dal}
+func NewInventoryService(inventoryDal dal.InventoryDalInterface) *inventoryService {
+	return &inventoryService{inventoryAccess: inventoryDal}
 }
 
+func (s *inventoryService) Add(models.InventoryItem) error {
+	return nil
+}
+
+func (s *inventoryService) Get() ([]models.InventoryItem, error) {
+	return []models.InventoryItem{}, nil
+}
+
+func (s *inventoryService) GetByID() (models.InventoryItem, error) {
+	return models.InventoryItem{}, nil
+}
+
+func (s *inventoryService) Delete(models.InventoryItem) error {
+	return nil
+}
+
+func (s *inventoryService) Update(string, models.InventoryItem) error {
+	return nil
+}

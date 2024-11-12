@@ -2,60 +2,79 @@ package service
 
 import (
 	"fmt"
-
 	dal "hot-coffee/internal/dal"
 	model "hot-coffee/models"
 )
 
-type Serv_menu interface {
-	PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem)
-}
-type Menu_serv struct {
-	menu_dal dal.Menu_dal
-}
-
-func NewDefault_servmenu(menu_dal *dal.Menu_dal) *Menu_serv {
-	return &Menu_serv{menu_dal: *menu_dal}
+type MenuService interface {
+	PostMenu(item model.MenuItem) error
+	GetMenu() ([]model.MenuItem, error)
+	GetMenuItemByID(id string) (*model.MenuItem, error)
+	PutMenuItem(id string, item model.MenuItem) (*model.MenuItem, error)
+	DeleteMenuItem(id string) error
 }
 
-func (s *Menu_serv) PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem) {
-	// logic
+type FileMenuService struct {
+	dataAccess dal.MenuDalInterface
+}
 
-	if putMenu.ID == "" {
-		fmt.Println("Menu ID can not be empty")
-		model.Logger.Error("Menu ID can not be empty")
-		return
+func NewFileMenuService(dataAccess dal.MenuDalInterface) *FileMenuService {
+	return &FileMenuService{dataAccess: dataAccess}
+}
+
+func (f *FileMenuService) PostMenu(item model.MenuItem) error {
+	items, err := f.dataAccess.LoadMenuItems()
+	if err != nil {
+		return err
 	}
+	items = append(items, item)
+	return f.dataAccess.SaveMenuItems(items)
+}
 
-	if putMenu.Name == "" {
-		fmt.Println("Name can not be empty. Please write name")
-		return
+func (f *FileMenuService) GetMenu() ([]model.MenuItem, error) {
+	return f.dataAccess.LoadMenuItems()
+}
+
+func (f *FileMenuService) GetMenuItemByID(id string) (*model.MenuItem, error) {
+	items, err := f.dataAccess.LoadMenuItems()
+	if err != nil {
+		return nil, err
 	}
-
-	if putMenu.Price < 0 {
-		fmt.Println("Price can not be lower than 0 (price >= 0)")
-		return
-	}
-
-	for _, val := range putMenu.Ingredients {
-		if val.IngredientID == "" {
-			fmt.Println("Ingredient ID can not be empty. Please write ingredient ID")
-			return
-		}
-
-		if val.Quantity <= 0 {
-			fmt.Println("Quantity of ingredient can not be equal or lesser than 0 (quantity > 0)")
-			return
+	for _, item := range items {
+		if item.ID == id {
+			return &item, nil
 		}
 	}
-
-	for _, vol := range checkMenu {
-		if vol.ID == putMenu.ID {
-			fmt.Println("Id can not be same")
-			return
-		}
-	}
-
-	s.menu_dal.PostMenuDal(putMenu)
+	return nil, fmt.Errorf("menu item not found")
 }
 
+func (f *FileMenuService) PutMenuItem(id string, item model.MenuItem) (*model.MenuItem, error) {
+	items, err := f.dataAccess.LoadMenuItems()
+	if err != nil {
+		return nil, err
+	}
+	for i, existingItem := range items {
+		if existingItem.ID == id {
+			items[i] = item
+			if err := f.dataAccess.SaveMenuItems(items); err != nil {
+				return nil, err
+			}
+			return &item, nil
+		}
+	}
+	return nil, fmt.Errorf("menu item not found")
+}
+
+func (f *FileMenuService) DeleteMenuItem(id string) error {
+	items, err := f.dataAccess.LoadMenuItems()
+	if err != nil {
+		return err
+	}
+	var updatedItems []model.MenuItem
+	for _, item := range items {
+		if item.ID != id {
+			updatedItems = append(updatedItems, item)
+		}
+	}
+	return f.dataAccess.SaveMenuItems(updatedItems)
+}
