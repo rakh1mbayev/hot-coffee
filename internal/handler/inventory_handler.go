@@ -2,8 +2,10 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"hot-coffee/internal/service"
 	"hot-coffee/models"
+	"io"
 	"io"
 	"net/http"
 	"strings"
