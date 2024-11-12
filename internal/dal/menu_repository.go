@@ -2,50 +2,30 @@ package dal
 
 import (
 	"encoding/json"
-	"hot-coffee/models"
-	"log"
-	"net/http"
+	model "hot-coffee/models"
 	"os"
 )
 
-type Dal_menu interface {
-	PostMenuDal(putMenu models.MenuItem)
-	GetMenuDal(w http.ResponseWriter)
+type FileDataAccess struct {
+	FilePath string
 }
 
-type Menu_dal struct {
-	Datapath string
-}
-
-func NewDefault(datapath string) *Menu_dal {
-	return &Menu_dal{Datapath: datapath}
-}
-
-func (dal *Menu_dal) PostMenuDal(putMenu models.MenuItem) {
-	var menuItems []models.MenuItem
-
-	if file, err := os.ReadFile(*models.Dir + "/menu.json"); err == nil && len(file) > 0 {
-		if err := json.Unmarshal(file, &menuItems); err != nil {
-
-			var singleItem models.MenuItem
-			if err := json.Unmarshal(file, &singleItem); err != nil {
-				log.Fatalf("Error unmarshaling JSON file in: menu_repository.go -> PostMenuDal %v", err)
-			}
-
-			menuItems = append(menuItems, singleItem)
-		}
-	}
-
-	menuItems = append(menuItems, putMenu)
-
-	writeJson, _ := json.MarshalIndent(menuItems, "", "\t")
-	err := os.WriteFile(*models.Dir+"/menu.json", writeJson, 0o644)
+func (f *FileDataAccess) LoadMenuItems() ([]model.MenuItem, error) {
+	file, err := os.ReadFile(f.FilePath)
 	if err != nil {
-		log.Fatalf("Error writing json file in: menu_repository.go -> PostMenuDal %v", err)
+		return nil, err
 	}
+	var items []model.MenuItem
+	if err := json.Unmarshal(file, &items); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
-func GetMenuDal(data []byte, w http.ResponseWriter) {
-	w.Header().Set("Content-type", "application/json")
-	w.Write(data)
+func (f *FileDataAccess) SaveMenuItems(items []model.MenuItem) error {
+	fileData, err := json.Marshal(items)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(f.FilePath, fileData, 0644)
 }

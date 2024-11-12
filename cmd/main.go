@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"hot-coffee/internal/dal"
 	"hot-coffee/internal/service"
 	"log"
 	"log/slog"
@@ -90,15 +89,15 @@ Options:
 
 	// menu
 	// need finish first
-	dal_menu := dal.NewDefault(*flags.Dir + "/menu.json")
-	serve_menu := service.NewDefault_servmenu(dal_menu)
-	menu_handler := handler.NewMenuHandler(serve_menu)
 
-	mux.HandleFunc("POST /menu", menu_handler.PostMenu)
-	mux.HandleFunc("GET /menu", menu_handler.GetMenu)
-	mux.HandleFunc("GET /menu/{id}", menu_handler.GetMenuItemByID)
-	mux.HandleFunc("PUT /menu/{id}", menu_handler.PutMenuItem)
-	mux.HandleFunc("DELETE /menu/{id}", menu_handler.DeleteMenuItem)
+	menuService := service.NewFileMenuService(*flags.Dir + "/menu.json")
+	menuHandler := handler.NewMenuHandler(menuService)
+
+	mux.HandleFunc("POST /menu", menuHandler.PostMenu)
+	mux.HandleFunc("GET /menu", menuHandler.GetMenu)
+	mux.HandleFunc("GET /menu/{id}", menuHandler.GetMenuItemByID)
+	mux.HandleFunc("PUT /menu/{id}", menuHandler.PutMenuItem)
+	mux.HandleFunc("DELETE /menu/{id}", menuHandler.DeleteMenuItem)
 
 	// inventory
 	// need finish second

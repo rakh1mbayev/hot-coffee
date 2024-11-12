@@ -1,139 +1,82 @@
 package service
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"os"
-
 	dal "hot-coffee/internal/dal"
 	model "hot-coffee/models"
 )
 
-type Serv_menu interface {
-	PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem)
+type MenuService interface {
+	PostMenu(item model.MenuItem) error
+	GetMenu() ([]model.MenuItem, error)
+	GetMenuItemByID(id string) (*model.MenuItem, error)
+	PutMenuItem(id string, item model.MenuItem) (*model.MenuItem, error)
+	DeleteMenuItem(id string) error
 }
 
-type Menu_serv struct {
-	menu_dal dal.Menu_dal
+type FileMenuService struct {
+	dataAccess *dal.FileDataAccess
 }
 
-func NewDefault_servmenu(menu_dal *dal.Menu_dal) *Menu_serv {
-	return &Menu_serv{menu_dal: *menu_dal}
+func NewFileMenuService(filePath string) *FileMenuService {
+	return &FileMenuService{
+		dataAccess: &dal.FileDataAccess{FilePath: filePath},
+	}
 }
 
-func (s *Menu_serv) PostMenuService(putMenu model.MenuItem, checkMenu []model.MenuItem) {
-	// logic
-
-	if putMenu.ID == "" {
-		fmt.Println("Menu ID can not be empty")
-		model.Logger.Error("Menu ID can not be empty")
-		return
-	}
-
-	if putMenu.Name == "" {
-		fmt.Println("Name can not be empty. Please write name")
-		return
-	}
-
-	if putMenu.Price < 0 {
-		fmt.Println("Price can not be lower than 0 (price >= 0)")
-		return
-	}
-
-	for _, val := range putMenu.Ingredients {
-		if val.IngredientID == "" {
-			fmt.Println("Ingredient ID can not be empty. Please write ingredient ID")
-			return
-		}
-
-		if val.Quantity <= 0 {
-			fmt.Println("Quantity of ingredient can not be equal or lesser than 0 (quantity > 0)")
-			return
-		}
-	}
-
-	for _, vol := range checkMenu {
-		if vol.ID == putMenu.ID {
-			fmt.Println("Id can not be same")
-			return
-		}
-	}
-
-	s.menu_dal.PostMenuDal(putMenu)
-}
-
-func GetMenuItem(id string) (model.MenuItem, error) {
-	file, err := os.ReadFile(*model.Dir + "/menu.json")
+func (f *FileMenuService) PostMenu(item model.MenuItem) error {
+	items, err := f.dataAccess.LoadMenuItems()
 	if err != nil {
-		// error
+		return err
 	}
+	items = append(items, item)
+	return f.dataAccess.SaveMenuItems(items)
+}
 
-	var menuItems []model.MenuItem
-	err = json.Unmarshal(file, &menuItems)
+func (f *FileMenuService) GetMenu() ([]model.MenuItem, error) {
+	return f.dataAccess.LoadMenuItems()
+}
+
+func (f *FileMenuService) GetMenuItemByID(id string) (*model.MenuItem, error) {
+	items, err := f.dataAccess.LoadMenuItems()
 	if err != nil {
-		// error
+		return nil, err
 	}
-	for _, item := range menuItems {
-		fmt.Println("ITEM", item.ID)
+	for _, item := range items {
 		if item.ID == id {
-			return item, nil
+			return &item, nil
 		}
 	}
-	return model.MenuItem{}, errors.New("ERROR: didn't found any item with given id")
+	return nil, fmt.Errorf("menu item not found")
 }
 
-func PutMenuItem(id string, item model.MenuItem) ([]byte, error) {
-	file, err := os.ReadFile(*model.Dir + "/menu.json")
+func (f *FileMenuService) PutMenuItem(id string, item model.MenuItem) (*model.MenuItem, error) {
+	items, err := f.dataAccess.LoadMenuItems()
 	if err != nil {
-		return []byte{}, err
+		return nil, err
 	}
-	MenuItems := []model.MenuItem{}
-	if err = json.Unmarshal(file, &MenuItems); err != nil {
-		return []byte{}, err
-	}
-	found := false
-	for i := 0; i < len(MenuItems); i++ {
-		if MenuItems[i].ID == id {
-			MenuItems[i] = item
-			found = true
-			break
+	for i, existingItem := range items {
+		if existingItem.ID == id {
+			items[i] = item
+			if err := f.dataAccess.SaveMenuItems(items); err != nil {
+				return nil, err
+			}
+			return &item, nil
 		}
 	}
-	if !found {
-		return []byte{}, errors.New("ERROR: didn't found any item with given id")
-	}
-	file, err = json.Marshal(MenuItems)
-	if err != nil {
-		return []byte{}, err
-	}
-	return file, nil
+	return nil, fmt.Errorf("menu item not found")
 }
 
-func DeleteMenuItem(id string, item model.MenuItem) ([]byte, error) {
-	file, err := os.ReadFile(*model.Dir + "/menu.json")
+func (f *FileMenuService) DeleteMenuItem(id string) error {
+	items, err := f.dataAccess.LoadMenuItems()
 	if err != nil {
-		return []byte{}, err
+		return err
 	}
-	MenuItems := []model.MenuItem{}
-	if err = json.Unmarshal(file, &MenuItems); err != nil {
-		return []byte{}, err
-	}
-	found := false
-	NewMenuItems := []model.MenuItem{}
-	for _, MenuItem := range MenuItems {
-		if MenuItem.ID == id {
-			found = true
-			continue
+	var updatedItems []model.MenuItem
+	for _, item := range items {
+		if item.ID != id {
+			updatedItems = append(updatedItems, item)
 		}
-		NewMenuItems = append(NewMenuItems, MenuItem)
 	}
-	if !found {
-		return []byte{}, errors.New("ERROR: didn't found any item with given id")
-	}
-	file, err = json.Marshal(NewMenuItems)
-	if err != nil {
-		return []byte{}, err
-	}
-	return file, nil
+	return f.dataAccess.SaveMenuItems(updatedItems)
 }
