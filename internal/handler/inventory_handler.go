@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"encoding/json"
 	"hot-coffee/internal/service"
+	"hot-coffee/models"
 	"net/http"
 )
 
@@ -14,7 +16,9 @@ func NewInventoryHandler(inventoryService service.InventoryServiceInterface) *In
 }
 
 func (h *InventoryHandler) PostInventory(w http.ResponseWriter, r *http.Request) {
-	
+	var newInventoryItem models.InventoryItem
+	json.NewDecoder(r.Body).Decode(&newInventoryItem)
+	h.inventoryService.Add(newInventoryItem)
 }
 
 func (h *InventoryHandler) GetInventory(w http.ResponseWriter, r *http.Request) {
