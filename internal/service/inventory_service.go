@@ -43,8 +43,18 @@ func (s *inventoryService) GetByID(id string) (models.InventoryItem, error) {
 	return models.InventoryItem{}, fmt.Errorf("menu item not found")
 }
 
-func (s *inventoryService) Delete(models.InventoryItem) error {
-	return nil
+func (s *inventoryService) Delete(id string) error {
+	items, err := s.inventoryAccess.GetAll()
+	if err != nil {
+		return err
+	}
+	var updatedItems []models.InventoryItem
+	for _, item := range items {
+		if item.IngredientID != id {
+			updatedItems = append(updatedItems, item)
+		}
+	}
+	return s.inventoryAccess.SaveInventoryItems(items)
 }
 
 func (s *inventoryService) Update(string, models.InventoryItem) error {
