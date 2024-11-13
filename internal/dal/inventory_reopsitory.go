@@ -2,24 +2,25 @@ package dal
 
 import (
 	"encoding/json"
-	model "hot-coffee/models"
 	"os"
+
+	model "hot-coffee/models"
 )
 
 type InventoryDalInterface interface {
 	GetAll() ([]model.InventoryItem, error)
-	SaveInventoryItems([]model.InventoryItem) error
+	Save([]model.InventoryItem) error
 }
 
-type InventoryFileDataAccess struct {
+type InventoryData struct {
 	path string
 }
 
-func NewInventoryRepo(path string) *InventoryFileDataAccess {
-	return &InventoryFileDataAccess{path: path}
+func NewInventoryRepo(path string) *InventoryData {
+	return &InventoryData{path: path}
 }
 
-func (i *InventoryFileDataAccess) GetAll() ([]model.InventoryItem, error) {
+func (i *InventoryData) GetAll() ([]model.InventoryItem, error) {
 	file, err := os.ReadFile(i.path)
 	if err != nil {
 		return nil, err
@@ -31,11 +32,11 @@ func (i *InventoryFileDataAccess) GetAll() ([]model.InventoryItem, error) {
 	return items, nil
 }
 
-func (i *InventoryFileDataAccess) SaveInventoryItems(items []model.InventoryItem) error {
+func (i *InventoryData) Save(items []model.InventoryItem) error {
 	fileData, err := json.MarshalIndent(items, "", "\t")
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(i.path, fileData, 0644)
+	return os.WriteFile(i.path, fileData, 0o644)
 }

@@ -2,11 +2,12 @@ package handler
 
 import (
 	"encoding/json"
-	"hot-coffee/internal/service"
-	model "hot-coffee/models"
 	"io"
 	"net/http"
 	"strings"
+
+	"hot-coffee/internal/service"
+	model "hot-coffee/models"
 )
 
 type OrderHandler struct {
@@ -17,8 +18,8 @@ func NewOrdersHandler(service service.OrdersService) *OrderHandler {
 	return &OrderHandler{service: service}
 }
 
-func (o *OrderHandler) PostOrders(w http.ResponseWriter, r *http.Request) {
-	var newOrderItem model.OrderItem
+func (o *OrderHandler) Add(w http.ResponseWriter, r *http.Request) {
+	var newOrderItem model.Order
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusBadRequest)
@@ -28,15 +29,16 @@ func (o *OrderHandler) PostOrders(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-	if err := o.service.PostOrders(newOrderItem); err != nil {
+	if err := o.service.Add(newOrderItem); err != nil {
 		http.Error(w, "Failed to add order item", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 }
-func (o *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
-	items, err := o.service.GetOrders()
+
+func (o *OrderHandler) Get(w http.ResponseWriter, r *http.Request) {
+	items, err := o.service.Get()
 	if err != nil {
 		http.Error(w, "Failed to load orders", http.StatusInternalServerError)
 		return
@@ -46,13 +48,14 @@ func (o *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-func (o *OrderHandler) GetOrdersID(w http.ResponseWriter, r *http.Request) {
+
+func (o *OrderHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
 		return
 	}
-	item, err := o.service.GetOrdersID(path[2])
+	item, err := o.service.GetByID(path[2])
 	if err != nil {
 		http.Error(w, "Order item not found", http.StatusNotFound)
 		return
@@ -62,8 +65,9 @@ func (o *OrderHandler) GetOrdersID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-func (o *OrderHandler) PutOrdersID(w http.ResponseWriter, r *http.Request) {
-	var updatedItem model.OrderItem
+
+func (o *OrderHandler) Update(w http.ResponseWriter, r *http.Request) {
+	var updatedItem model.Order
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusBadRequest)
@@ -78,23 +82,20 @@ func (o *OrderHandler) PutOrdersID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
 		return
 	}
-	item, err := o.service.PutOrdersID(path[2], updatedItem)
-	if err != nil {
+	if err := o.service.Update(path[2], updatedItem); err != nil {
 		http.Error(w, "Order item not found", http.StatusNotFound)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
-	if err = json.NewEncoder(w).Encode(item); err != nil {
-		return
-	}
 }
-func (o *OrderHandler) DeleteOrdersID(w http.ResponseWriter, r *http.Request) {
+
+func (o *OrderHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
 		return
 	}
-	err := o.service.DeleteOrdersID(path[2])
+	err := o.service.Delete(path[2])
 	if err != nil {
 		http.Error(w, "Order item not found", http.StatusNotFound)
 		return
@@ -102,14 +103,14 @@ func (o *OrderHandler) DeleteOrdersID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusNoContent)
 }
-func (o *OrderHandler) PostOrdersIDnClose(w http.ResponseWriter, r *http.Request) {
 
+func (o *OrderHandler) Close(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
 		http.Error(w, "Invalid request path", http.StatusBadRequest)
 		return
 	}
-	err := o.service.PostOrdersIDnClose(path[2])
+	err := o.service.Close(path[2])
 	if err != nil {
 		http.Error(w, "Order item not found", http.StatusNotFound)
 		return
