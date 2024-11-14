@@ -27,6 +27,42 @@ func NewFileOrderService(filePath string) *FileOrderService {
 }
 
 func (o *FileOrderService) Add(order model.Order) error {
+	if order.ID == "" {
+		fmt.Println("Order ID can not be empty. Please write it!")
+		model.Logger.Error("Order ID can not be empty. Please write it!")
+		return nil
+	}
+
+	if order.CustomerName == "" {
+		fmt.Println("Customer name can not be empty. Please write it!")
+		model.Logger.Error("Customer name can not be empty. Please write it!")
+		return nil
+	}
+
+	if order.CreatedAt == "" {
+		fmt.Println("Create time can not be empty. Please write it!")
+		model.Logger.Error("Create time can not be empty. Please write it!")
+		return nil
+	}
+
+	if order.Status != "open" {
+		fmt.Println("Please write correctly order status")
+		model.Logger.Error("Create time can not be empty. Please write it!")
+		return nil
+	}
+
+	items, err := o.dataAccess.GetAll()
+	if err != nil {
+		return err
+	}
+	for _, val := range items {
+		if val.ID == order.ID {
+			fmt.Println("Order Id can not be same")
+			model.Logger.Error("Order Id can not be same")
+			return nil
+		}
+	}
+
 	orders, err := o.dataAccess.GetAll()
 	if err != nil {
 		return err
@@ -53,6 +89,7 @@ func (o *FileOrderService) GetByID(id string) (*model.Order, error) {
 			return &order, nil
 		}
 	}
+	model.Logger.Info("order not found")
 	return nil, fmt.Errorf("order not found")
 }
 
@@ -67,6 +104,7 @@ func (o *FileOrderService) Update(id string, item model.Order) error {
 			return o.dataAccess.Save(orders)
 		}
 	}
+	model.Logger.Info("menu item not found")
 	return fmt.Errorf("menu item not found")
 }
 
@@ -85,6 +123,7 @@ func (o *FileOrderService) Delete(id string) error {
 		}
 	}
 	if !found {
+		model.Logger.Info("order not found")
 		return fmt.Errorf("order not found")
 	}
 	return o.dataAccess.Save(newOrders)
@@ -101,5 +140,6 @@ func (o *FileOrderService) Close(id string) error {
 			return o.dataAccess.Save(orders)
 		}
 	}
+	model.Logger.Info("menu item not found")
 	return fmt.Errorf("menu item not found")
 }

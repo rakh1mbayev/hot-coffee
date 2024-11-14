@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"hot-coffee/internal/dal"
 	"hot-coffee/internal/service"
 	model "hot-coffee/models"
 )
@@ -22,15 +23,15 @@ func (o *OrderHandler) Add(w http.ResponseWriter, r *http.Request) {
 	var newOrderItem model.Order
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		dal.SendError("Error reading request body", http.StatusBadRequest, w)
 		return
 	}
 	if err := json.Unmarshal(body, &newOrderItem); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		dal.SendError("Invalid JSON", http.StatusBadRequest, w)
 		return
 	}
 	if err := o.service.Add(newOrderItem); err != nil {
-		http.Error(w, "Failed to add order item", http.StatusInternalServerError)
+		dal.SendError("Failed to add order item", http.StatusInternalServerError, w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
@@ -40,7 +41,7 @@ func (o *OrderHandler) Add(w http.ResponseWriter, r *http.Request) {
 func (o *OrderHandler) Get(w http.ResponseWriter, r *http.Request) {
 	items, err := o.service.Get()
 	if err != nil {
-		http.Error(w, "Failed to load orders", http.StatusInternalServerError)
+		dal.SendError("Failed to load orders", http.StatusInternalServerError, w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
@@ -52,12 +53,12 @@ func (o *OrderHandler) Get(w http.ResponseWriter, r *http.Request) {
 func (o *OrderHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		dal.SendError("Invalid request path", http.StatusBadRequest, w)
 		return
 	}
 	item, err := o.service.GetByID(path[2])
 	if err != nil {
-		http.Error(w, "Order item not found", http.StatusNotFound)
+		dal.SendError("Order item not found", http.StatusNotFound, w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
@@ -70,20 +71,20 @@ func (o *OrderHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var updatedItem model.Order
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		dal.SendError("Error reading request body", http.StatusBadRequest, w)
 		return
 	}
 	if err := json.Unmarshal(body, &updatedItem); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		dal.SendError("Invalid JSON", http.StatusBadRequest, w)
 		return
 	}
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		dal.SendError("Invalid request path", http.StatusBadRequest, w)
 		return
 	}
 	if err := o.service.Update(path[2], updatedItem); err != nil {
-		http.Error(w, "Order item not found", http.StatusNotFound)
+		dal.SendError("Order item not found", http.StatusNotFound, w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
@@ -92,12 +93,12 @@ func (o *OrderHandler) Update(w http.ResponseWriter, r *http.Request) {
 func (o *OrderHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		dal.SendError("Invalid request path", http.StatusBadRequest, w)
 		return
 	}
 	err := o.service.Delete(path[2])
 	if err != nil {
-		http.Error(w, "Order item not found", http.StatusNotFound)
+		dal.SendError("Order item not found", http.StatusNotFound, w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
@@ -107,12 +108,12 @@ func (o *OrderHandler) Delete(w http.ResponseWriter, r *http.Request) {
 func (o *OrderHandler) Close(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		dal.SendError("Invalid request path", http.StatusBadRequest, w)
 		return
 	}
 	err := o.service.Close(path[2])
 	if err != nil {
-		http.Error(w, "Order item not found", http.StatusNotFound)
+		dal.SendError("Order item not found", http.StatusNotFound, w)
 		return
 	}
 }

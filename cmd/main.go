@@ -2,15 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
-	"os"
 
 	"hot-coffee/internal/dal"
 	"hot-coffee/internal/service"
-	"hot-coffee/models"
 
 	"hot-coffee/internal/handler"
 
@@ -20,64 +16,12 @@ import (
 func main() {
 	flag.Parse()
 
-	if *flags.Help { // flag help I do not know where save it
-		fmt.Println(
-			`Coffee Shop Management System
-
-Usage:
-  hot-coffee [--port <N>] [--dir <S>] 
-  hot-coffee --help
-
-Options:
-  --help       Show this screen.
-  --port N     Port number.
-  --dir S      Path to the data directory.`)
+	if *flags.Help {
+		dal.Helper()
 		return
 	}
 
-	if _, err := os.Stat(*flags.Dir); err != nil { // Check if dir exists if not create
-		os.Mkdir(*flags.Dir, 0o755)
-	}
-
-	if _, err := os.Stat(*flags.Dir + "/menu.json"); err != nil { // Check if /menu.json exists if not create
-		file, err := os.Create(*flags.Dir + "/menu.json")
-		if err != nil {
-			fmt.Println("Error creating menu.json in main.go -> main:", err)
-		}
-		defer file.Close()
-	}
-
-	if _, err := os.Stat(*flags.Dir + "/inventory.json"); err != nil { // Check if inventory.json exists if not create
-		file, err := os.Create(*flags.Dir + "/inventory.json")
-		if err != nil {
-			fmt.Println("Error creating inventory.json in main.go -> main:", err)
-		}
-		defer file.Close()
-	}
-
-	if _, err := os.Stat(*flags.Dir + "/orders.json"); err != nil { // Check if orders.json exists if not create
-		file, err := os.Create(*flags.Dir + "/orders.json")
-		if err != nil {
-			fmt.Println("Error creating orders.json in main.go -> main:", err)
-		}
-		defer file.Close()
-	}
-
-	if _, err := os.Stat(*flags.Dir + "/report.log"); err != nil { // Check if /report.log exists if not create
-		file, err := os.Create(*flags.Dir + "/report.log")
-		if err != nil {
-			fmt.Println("Error creating report.log in main.go -> main:", err)
-		}
-		defer file.Close()
-	}
-
-	file, err := os.OpenFile(*flags.Dir+"/report.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
-	if err != nil {
-		fmt.Println("Error opening file in: main.go.go -> main", err)
-		return
-	}
-
-	flags.Logger = slog.New(slog.NewTextHandler(file, nil))
+	dal.Create()
 
 	mux := http.NewServeMux()
 
@@ -85,7 +29,6 @@ Options:
 	ordersHandler := handler.NewOrdersHandler(ordersService)
 
 	// orders
-	// need finish the last
 	mux.HandleFunc("POST /orders", ordersHandler.Add)
 	mux.HandleFunc("GET /orders", ordersHandler.Get)
 	mux.HandleFunc("GET /orders/{id}", ordersHandler.GetByID)
@@ -94,8 +37,7 @@ Options:
 	mux.HandleFunc("POST /orders/{id}/close", ordersHandler.Close)
 
 	// menu
-	// need finish first
-	menuDal := dal.NewMenuRepo(*models.Dir + "/menu.json")
+	menuDal := dal.NewMenuRepo(*flags.Dir + "/menu.json")
 	menuService := service.NewFileMenuService(menuDal)
 	menuHandler := handler.NewMenuHandler(menuService)
 
@@ -106,8 +48,7 @@ Options:
 	mux.HandleFunc("DELETE /menu/{id}", menuHandler.Delete)
 
 	// inventory
-	// need finish second
-	inventoryDal := dal.NewInventoryRepo(*models.Dir + "/inventory.json")
+	inventoryDal := dal.NewInventoryRepo(*flags.Dir + "/inventory.json")
 	inventoryService := service.NewInventoryService(inventoryDal)
 	inventoryHandler := handler.NewInventoryHandler(inventoryService)
 
@@ -117,7 +58,7 @@ Options:
 	mux.HandleFunc("PUT /inventory/{id}", inventoryHandler.Update)
 	mux.HandleFunc("DELETE /inventory/{id}", inventoryHandler.Delete)
 
-	reportsDal := dal.NewMenuRepo(*models.Dir + "/orders.json")
+	reportsDal := dal.NewMenuRepo(*flags.Dir + "/orders.json")
 	reportsService := service.NewFileMenuService(reportsDal)
 	reportsHandler := handler.NewMenuHandler(reportsService)
 
@@ -125,6 +66,6 @@ Options:
 	mux.HandleFunc("GET /reports/total-sales", reportsHandler.GetTotalSales)
 	mux.HandleFunc("GET /reports/popular-items", reportsHandler.GetPopularItems)
 
+	flags.Logger.Info("Host is started")
 	log.Fatal(http.ListenAndServe(":"+*flags.Port, mux))
-
 }

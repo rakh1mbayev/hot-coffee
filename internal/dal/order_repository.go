@@ -29,7 +29,7 @@ func (f *OrderData) GetAll() ([]model.Order, error) {
 }
 
 func (f *OrderData) Save(items []model.Order) error {
-	fileData, err := json.Marshal(items)
+	fileData, err := json.MarshalIndent(items, "", "\t")
 	if err != nil {
 		return err
 	}
