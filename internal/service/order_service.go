@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"hot-coffee/internal/dal"
@@ -156,6 +157,10 @@ func (o *FileOrderService) Close(id string) error {
 	orderIndex := -1
 	for i, order := range orders {
 		if order.ID == id {
+			if order.Status == "closed" {
+				model.Logger.Info("already closed")
+				return errors.New("already closed")
+			}
 			orderToClose = &orders[i]
 			orderIndex = i
 			break
