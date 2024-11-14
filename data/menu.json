@@ -14,5 +14,17 @@
 				"quantity": 200
 			}
 		]
+	},
+	{
+		"product_id": "latte",
+		"name": "Caffe Latte",
+		"description": "Espresso with steamed milk",
+		"price": 3,
+		"ingredients": [
+			{
+				"ingredient_id": "pizza",
+				"quantity": 1
+			}
+		]
 	}
 ]

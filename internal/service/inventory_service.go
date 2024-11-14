@@ -11,7 +11,7 @@ type InventoryInterface interface {
 	Add(models.InventoryItem) error
 	Get() ([]models.InventoryItem, error)
 	GetByID(id string) (models.InventoryItem, error)
-	Update(string, models.InventoryItem) error
+	Update(string, models.InventoryItem, int) error
 	Delete(string) error
 }
 
@@ -83,7 +83,7 @@ func (s *FileInventoryService) GetByID(id string) (models.InventoryItem, error) 
 	return models.InventoryItem{}, fmt.Errorf("menu item not found")
 }
 
-func (s *FileInventoryService) Update(id string, item models.InventoryItem) error {
+func (s *FileInventoryService) Update(id string, item models.InventoryItem, newQuantity int) error {
 	items, err := s.dataAccess.GetAll()
 	if err != nil {
 		return err
@@ -91,6 +91,7 @@ func (s *FileInventoryService) Update(id string, item models.InventoryItem) erro
 	for i, existingItem := range items {
 		if existingItem.IngredientID == id {
 			items[i] = item
+			items[i].Quantity = float64(newQuantity)
 			return s.dataAccess.Save(items)
 		}
 	}

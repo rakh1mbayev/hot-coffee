@@ -25,17 +25,6 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	ordersService := service.NewFileOrderService(*flags.Dir + "/orders.json")
-	ordersHandler := handler.NewOrdersHandler(ordersService)
-
-	// orders
-	mux.HandleFunc("POST /orders", ordersHandler.Add)
-	mux.HandleFunc("GET /orders", ordersHandler.Get)
-	mux.HandleFunc("GET /orders/{id}", ordersHandler.GetByID)
-	mux.HandleFunc("PUT /orders/{id}", ordersHandler.Update)
-	mux.HandleFunc("DELETE /orders/{id}", ordersHandler.Delete)
-	mux.HandleFunc("POST /orders/{id}/close", ordersHandler.Close)
-
 	// menu
 	menuDal := dal.NewMenuRepo(*flags.Dir + "/menu.json")
 	menuService := service.NewFileMenuService(menuDal)
@@ -47,11 +36,22 @@ func main() {
 	mux.HandleFunc("PUT /menu/{id}", menuHandler.Update)
 	mux.HandleFunc("DELETE /menu/{id}", menuHandler.Delete)
 
-	// inventory
 	inventoryDal := dal.NewInventoryRepo(*flags.Dir + "/inventory.json")
 	inventoryService := service.NewInventoryService(inventoryDal)
 	inventoryHandler := handler.NewInventoryHandler(inventoryService)
 
+	ordersService := service.NewFileOrderService(*flags.Dir+"/orders.json", menuService, inventoryService)
+	ordersHandler := handler.NewOrdersHandler(ordersService)
+
+	// orders
+	mux.HandleFunc("POST /orders", ordersHandler.Add)
+	mux.HandleFunc("GET /orders", ordersHandler.Get)
+	mux.HandleFunc("GET /orders/{id}", ordersHandler.GetByID)
+	mux.HandleFunc("PUT /orders/{id}", ordersHandler.Update)
+	mux.HandleFunc("DELETE /orders/{id}", ordersHandler.Delete)
+	mux.HandleFunc("POST /orders/{id}/close", ordersHandler.Close)
+
+	// inventory
 	mux.HandleFunc("POST /inventory", inventoryHandler.Add)
 	mux.HandleFunc("GET /inventory", inventoryHandler.Get)
 	mux.HandleFunc("GET /inventory/{id}", inventoryHandler.GetByID)

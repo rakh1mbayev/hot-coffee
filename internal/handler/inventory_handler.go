@@ -76,7 +76,7 @@ func (h *InventoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 		dal.SendError("Invalid request path", http.StatusBadRequest, w)
 		return
 	}
-	if err = h.inventoryService.Update(path[2], updatedItem); err != nil {
+	if err = h.inventoryService.Update(path[2], updatedItem, int(updatedItem.Quantity)); err != nil {
 		dal.SendError("Inventory item not found", http.StatusNotFound, w)
 		return
 	}
