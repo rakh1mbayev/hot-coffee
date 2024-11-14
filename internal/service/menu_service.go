@@ -32,32 +32,32 @@ func (f *FileMenuService) Add(item model.MenuItem) error {
 	if item.ID == "" {
 		fmt.Println("Menu ID can not be empty")
 		model.Logger.Error("Menu ID can not be empty")
-		return errors.New("Menu ID can not be empty")
+		return errors.New("menu ID can not be empty")
 	}
 
 	if item.Name == "" {
 		fmt.Println("Name can not be empty. Please write name")
 		model.Logger.Error("Name can not be empty. Please write name")
-		return nil
+		return errors.New("name can not be empty. Please write name")
 	}
 
 	if item.Price < 0 {
 		fmt.Println("Price can not be lower than 0 (price >= 0)")
 		model.Logger.Error("Price can not be lower than 0 (price >= 0)")
-		return nil
+		return errors.New("pice can not be lower than 0 (price >= 0)")
 	}
 
 	for _, val := range item.Ingredients {
 		if val.IngredientID == "" {
 			fmt.Println("Ingredient ID can not be empty. Please write ingredient ID")
 			model.Logger.Error("Ingredient ID can not be empty. Please write ingredient ID")
-			return nil
+			return errors.New("ingredient ID can not be empty. Please write ingredient ID")
 		}
 
 		if val.Quantity <= 0 {
 			fmt.Println("Quantity of ingredient can not be equal or lesser than 0 (quantity > 0)")
 			model.Logger.Error("Quantity of ingredient can not be equal or lesser than 0 (quantity > 0)")
-			return nil
+			return errors.New("quantity of ingredient can not be equal or lesser than 0 (quantity > 0)")
 		}
 	}
 
@@ -71,7 +71,7 @@ func (f *FileMenuService) Add(item model.MenuItem) error {
 		if vol.ID == item.ID {
 			fmt.Println("Menu Id can not be same")
 			model.Logger.Error("Menu Id can not be same")
-			return nil
+			return errors.New("menu Id can not be same")
 		}
 	}
 

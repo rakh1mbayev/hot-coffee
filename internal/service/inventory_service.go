@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+
 	"hot-coffee/internal/dal"
 	"hot-coffee/models"
 )
@@ -27,37 +28,37 @@ func (s *FileInventoryService) Add(item models.InventoryItem) error {
 	if item.IngredientID == "" {
 		models.Logger.Error("Ingredient ID can not be empty")
 		fmt.Println("Ingredient ID can not be empty")
-		return errors.New("Ingredient ID can not be empty")
+		return errors.New("ingredient ID can not be empty")
 	}
 
 	if item.Name == "" {
 		models.Logger.Error("Ingredient name can not be empty")
 		fmt.Println("Ingredient name can not be empty")
-		return nil
+		return errors.New("ingredient name can not be empty")
 	}
 
 	if item.Unit == "" {
 		models.Logger.Error("Ingredient unit can not be empty")
 		fmt.Println("Ingredient unit can not be empty")
-		return nil
+		return errors.New("ingredient unit can not be empty")
 	}
 
 	if item.Quantity <= 0 {
 		models.Logger.Error("Ingredient quantity can not be equal or lower than 0 (quantity > 0)")
 		fmt.Println("Ingredient quantity can not be equal or lower than 0 (quantity > 0)")
-		return nil
+		return errors.New("ingredient quantity can not be equal or lower than 0 (quantity > 0)")
 	}
 
 	items, err := s.dataAccess.GetAll()
 	if err != nil {
-		return err
+		return errors.New("coul do not get data")
 	}
 
 	for _, val := range items {
 		if val.IngredientID == item.IngredientID {
 			models.Logger.Error("Ingredient ID can not be same")
 			fmt.Println("Ingredient ID can not be same")
-			return nil
+			return errors.New("ingredient ID can not be same")
 		}
 	}
 
