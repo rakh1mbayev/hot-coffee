@@ -11,7 +11,6 @@ import (
 )
 
 func Create() {
-
 	if _, err := os.Stat(*flags.Dir); err != nil { // Check if dir exists if not create
 		os.Mkdir(*flags.Dir, 0o755)
 	}

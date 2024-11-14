@@ -60,7 +60,6 @@ func (f *FileMenuService) Add(item model.MenuItem) error {
 		}
 	}
 
-
 	model.TotalPrice += item.Price
 	items, err := f.dataAccess.GetAll()
 	if err != nil {

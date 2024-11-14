@@ -1,27 +1,15 @@
 [
 	{
-		"order_id": "order123",
+		"order_id": "order1",
 		"customer_name": "Alice Smith",
 		"items": [
 			{
-				"product_id": "latte",
-				"quantity": 2
+				"product_id": "fanta",
+				"quantity": 1
 			},
 			{
-				"product_id": "muffin",
+				"product_id": "latte",
 				"quantity": 1
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order77",
-		"customer_name": "Adil",
-		"items": [
-			{
-				"product_id": "pizza",
-				"quantity": 90
 			}
 		],
 		"status": "closed",
@@ -29,178 +17,34 @@
 	},
 	{
 		"order_id": "order2",
-		"customer_name": "Adil",
-		"items": [
-			{
-				"product_id": "pizza",
-				"quantity": 500
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order11",
-		"customer_name": "Alice Smith",
-		"items": [
-			{
-				"product_id": "latte",
-				"quantity": 2
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order13",
-		"customer_name": "Alice Smith",
-		"items": [
-			{
-				"product_id": "latte",
-				"quantity": 1000
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order14",
 		"customer_name": "Alice Smith",
 		"items": [
 			{
 				"product_id": "fanta",
-				"quantity": 1000
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order15",
-		"customer_name": "Alice Smith",
-		"items": [
-			{
-				"product_id": "latte",
-				"quantity": 1000
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order16",
-		"customer_name": "Alice Smith",
-		"items": [
-			{
-				"product_id": "latte",
-				"quantity": 1
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order18",
-		"customer_name": "Alice Smith",
-		"items": [
-			{
-				"product_id": "latte",
-				"quantity": 300
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order19",
-		"customer_name": "Alice Smith",
-		"items": [
-			{
-				"product_id": "latte",
-				"quantity": 310
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order21",
-		"customer_name": "Alice Smith",
-		"items": [
-			{
-				"product_id": "fanta",
-				"quantity": 2
+				"quantity": 0
 			},
 			{
 				"product_id": "latte",
 				"quantity": 1
 			}
 		],
-		"status": "open",
+		"status": "closed",
 		"created_at": "2023-10-01T09:00:00Z"
 	},
 	{
-		"order_id": "order22",
+		"order_id": "order3",
 		"customer_name": "Alice Smith",
 		"items": [
 			{
 				"product_id": "fanta",
-				"quantity": 2
+				"quantity": 0
 			},
 			{
 				"product_id": "latte",
 				"quantity": 1
 			}
 		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order23",
-		"customer_name": "Alice Smith",
-		"items": [
-			{
-				"product_id": "fanta",
-				"quantity": 3
-			},
-			{
-				"product_id": "latte",
-				"quantity": 2
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order24",
-		"customer_name": "Alice Smith",
-		"items": [
-			{
-				"product_id": "fanta",
-				"quantity": 100
-			},
-			{
-				"product_id": "latte",
-				"quantity": 100
-			}
-		],
-		"status": "open",
-		"created_at": "2023-10-01T09:00:00Z"
-	},
-	{
-		"order_id": "order25",
-		"customer_name": "Alice Smith",
-		"items": [
-			{
-				"product_id": "fanta",
-				"quantity": 100
-			},
-			{
-				"product_id": "latte",
-				"quantity": 100
-			}
-		],
-		"status": "open",
+		"status": "closed",
 		"created_at": "2023-10-01T09:00:00Z"
 	}
 ]

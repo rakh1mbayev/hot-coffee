@@ -31,105 +31,53 @@ func NewFileOrderService(filePath string, menuService MenuService, inventoryServ
 }
 
 func (o *FileOrderService) Add(order model.Order) error {
-	if order.ID == "" {
-		fmt.Println("Order ID can not be empty. Please write it!")
-		model.Logger.Error("Order ID can not be empty. Please write it!")
-		return nil
+	// 1. Validate required fields
+	if order.ID == "" || order.CustomerName == "" || order.CreatedAt == "" || order.Status != "open" {
+		model.Logger.Error("Invalid order data: missing fields or incorrect status")
+		return fmt.Errorf("invalid order data")
 	}
 
-	if order.CustomerName == "" {
-		fmt.Println("Customer name can not be empty. Please write it!")
-		model.Logger.Error("Customer name can not be empty. Please write it!")
-		return nil
-	}
-
-	if order.CreatedAt == "" {
-		fmt.Println("Create time can not be empty. Please write it!")
-		model.Logger.Error("Create time can not be empty. Please write it!")
-		return nil
-	}
-
-	if order.Status != "open" {
-		fmt.Println("Please write correctly order status")
-		model.Logger.Error("Create time can not be empty. Please write it!")
-		return nil
-	}
-
-	ordersMenu, err := o.menuAccess.Get()
-	if err != nil {
-		return err
-	}
-
-	isExists := false
-	for _, val := range ordersMenu {
-		for _, vol := range order.Items {
-			if val.ID == vol.ProductID {
-				isExists = true
-			}
-		}
-	}
-
-	if !isExists {
-		fmt.Println("Product with this name does not exists")
-		model.Logger.Error("Product with this name does not exists")
-		return nil
-	}
-
-	// Loop through order items and check menu
-	for _, item := range order.Items {
-		file, err := o.menuAccess.GetByID(item.ProductID)
+	// 2. Check if all items exist in the menu and validate inventory
+	for _, orderItem := range order.Items {
+		// Check if item exists in the menu
+		menuItem, err := o.menuAccess.GetByID(orderItem.ProductID)
 		if err != nil {
-			fmt.Printf("Product with ID %s not found in menu\n", item.ProductID)
-			model.Logger.Info(fmt.Sprintf("Product with ID %s not found in inventory", item.ProductID))
-			return fmt.Errorf("product with ID %s not found in inventory", item.ProductID)
+			model.Logger.Error(fmt.Sprintf("Product with ID %s not found in menu", orderItem.ProductID))
+			return fmt.Errorf("product with ID %s not found in menu", orderItem.ProductID)
 		}
 
-		for _, vel := range file.Ingredients {
-			fileInventory, err := o.inventoryAcces.GetByID(vel.IngredientID)
+		// Check each ingredient in the menu item for inventory availability
+		for _, ingredient := range menuItem.Ingredients {
+			inventoryItem, err := o.inventoryAcces.GetByID(ingredient.IngredientID)
 			if err != nil {
-				fmt.Printf("Inventory with ID %s not found in inventory\n", vel.IngredientID)
-				model.Logger.Info(fmt.Sprintf("Inventory with ID %s not found in inventory", vel.IngredientID))
-				return fmt.Errorf("inventory with ID %s not found in inventory", vel.IngredientID)
+				model.Logger.Error(fmt.Sprintf("Ingredient with ID %s not found in inventory", ingredient.IngredientID))
+				return fmt.Errorf("ingredient with ID %s not found in inventory", ingredient.IngredientID)
 			}
 
-			for _, vil := range order.Items {
-				for _, vol := range ordersMenu {
-					for _, vel := range vol.Ingredients {
-						fmt.Println("fileInventory:", fileInventory)
-						fmt.Println("fileInventory.Quantity:", fileInventory.Quantity)
-						fmt.Println("float64(vil.Quantity)*vel.Quantity:", float64(vil.Quantity)*vel.Quantity)
-						if fileInventory.Quantity < float64(vil.Quantity)*vel.Quantity {
-							fmt.Println("Not enought item for this product")
-							model.Logger.Info("Not enought item for this product")
-							return fmt.Errorf("not enought item for this product")
-						} else {
-							break
-						}
-					}
-				}
+			// Check if enough quantity is available
+			requiredQuantity := float64(orderItem.Quantity) * ingredient.Quantity
+			if inventoryItem.Quantity < requiredQuantity {
+				model.Logger.Error(fmt.Sprintf("Not enough stock for ingredient %s", ingredient.IngredientID))
+				return fmt.Errorf("not enough stock for ingredient %s", ingredient.IngredientID)
 			}
 		}
 	}
 
-	items, err := o.dataAccess.GetAll()
+	// 3. Check for duplicate Order ID
+	existingOrders, err := o.dataAccess.GetAll()
 	if err != nil {
 		return err
 	}
-
-	for _, val := range items {
-		if val.ID == order.ID {
-			fmt.Println("Order Id can not be same")
-			model.Logger.Error("Order Id can not be same")
-			return nil
+	for _, existingOrder := range existingOrders {
+		if existingOrder.ID == order.ID {
+			model.Logger.Error("Duplicate order ID")
+			return fmt.Errorf("order ID already exists")
 		}
 	}
 
-	orders, err := o.dataAccess.GetAll()
-	if err != nil {
-		return err
-	}
-	orders = append(orders, order)
-	return o.dataAccess.Save(orders)
+	// 4. Save the new order
+	existingOrders = append(existingOrders, order)
+	return o.dataAccess.Save(existingOrders)
 }
 
 func (o *FileOrderService) Get() ([]model.Order, error) {
@@ -191,36 +139,60 @@ func (o *FileOrderService) Delete(id string) error {
 }
 
 func (o *FileOrderService) Close(id string) error {
-
+	// 1. Retrieve all orders and check if the order exists
 	orders, err := o.dataAccess.GetAll()
 	if err != nil {
 		return err
 	}
 
+	var orderToClose *model.Order
+	orderIndex := -1
 	for i, order := range orders {
-
 		if order.ID == id {
-			// Loop through order items and check inventory
-			for _, item := range order.Items {
-				inventoryItem, err := o.inventoryAcces.GetByID(item.ProductID)
-				if err != nil {
-					fmt.Printf("Product with ID %s not found in inventory\n", item.ProductID)
-					model.Logger.Info(fmt.Sprintf("Product with ID %s not found in inventory", item.ProductID))
-					return fmt.Errorf("product with ID %s not found in inventory", item.ProductID)
-				}
+			orderToClose = &orders[i]
+			orderIndex = i
+			break
+		}
+	}
+	if orderToClose == nil {
+		model.Logger.Info("Order not found")
+		return fmt.Errorf("order not found")
+	}
 
-				newQuantity := int(inventoryItem.Quantity) - item.Quantity
-				o.inventoryAcces.Update(item.ProductID, inventoryItem, newQuantity)
+	// 2. For each item in the order, verify against menu and update inventory
+	for _, item := range orderToClose.Items {
+		// Check if item exists in the menu
+		menuItem, err := o.menuAccess.GetByID(item.ProductID)
+		if err != nil {
+			model.Logger.Error(fmt.Sprintf("Product with ID %s not found in menu", item.ProductID))
+			return fmt.Errorf("product with ID %s not found in menu", item.ProductID)
+		}
+
+		// Check each ingredient in the menu item and update inventory
+		for _, ingredient := range menuItem.Ingredients {
+			inventoryItem, err := o.inventoryAcces.GetByID(ingredient.IngredientID)
+			if err != nil {
+				model.Logger.Error(fmt.Sprintf("Ingredient with ID %s not found in inventory", ingredient.IngredientID))
+				return fmt.Errorf("ingredient with ID %s not found in inventory", ingredient.IngredientID)
 			}
 
-			// If all items are in stock, proceed to close the order
-			orders[i].Status = "closed"
-			return o.dataAccess.Save(orders)
+			// Calculate required quantity
+			requiredQuantity := float64(item.Quantity) * ingredient.Quantity
+			if inventoryItem.Quantity < requiredQuantity {
+				model.Logger.Error(fmt.Sprintf("Not enough stock for ingredient %s", ingredient.IngredientID))
+				return fmt.Errorf("not enough stock for ingredient %s", ingredient.IngredientID)
+			}
+
+			// Deduct the required quantity from inventory and update
+			newQuantity := inventoryItem.Quantity - requiredQuantity
+			err = o.inventoryAcces.Update(ingredient.IngredientID, inventoryItem, int(newQuantity))
+			if err != nil {
+				return fmt.Errorf("failed to update inventory for ingredient %s", ingredient.IngredientID)
+			}
 		}
 	}
 
-	// If no matching order was found
-	fmt.Println("Order not found")
-	model.Logger.Info("Order not found")
-	return fmt.Errorf("order not found")
+	// 3. Mark the order as closed and save it
+	orders[orderIndex].Status = "closed"
+	return o.dataAccess.Save(orders)
 }
