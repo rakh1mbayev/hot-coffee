@@ -31,7 +31,7 @@ func (f *FileMenuService) Add(item model.MenuItem) error {
 	if item.ID == "" {
 		fmt.Println("Menu ID can not be empty")
 		model.Logger.Error("Menu ID can not be empty")
-		return nil
+
 	}
 
 	if item.Name == "" {
