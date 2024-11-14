@@ -176,6 +176,7 @@ func (o *FileOrderService) Close(id string) error {
 	for _, item := range orderToClose.Items {
 		// Check if item exists in the menu
 		menuItem, err := o.menuAccess.GetByID(item.ProductID)
+		model.PriceList[menuItem.ID] = menuItem.Price
 		if err != nil {
 			fmt.Printf("Product with ID %s not found in menu", item.ProductID)
 			model.Logger.Error(fmt.Sprintf("Product with ID %s not found in menu", item.ProductID))
@@ -211,5 +212,6 @@ func (o *FileOrderService) Close(id string) error {
 
 	// 3. Mark the order as closed and save it
 	orders[orderIndex].Status = "closed"
+
 	return o.dataAccess.Save(orders)
 }

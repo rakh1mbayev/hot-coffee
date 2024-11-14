@@ -58,9 +58,9 @@ func main() {
 	mux.HandleFunc("PUT /inventory/{id}", inventoryHandler.Update)
 	mux.HandleFunc("DELETE /inventory/{id}", inventoryHandler.Delete)
 
-	reportsDal := dal.NewMenuRepo(*flags.Dir + "/orders.json")
-	reportsService := service.NewFileMenuService(reportsDal)
-	reportsHandler := handler.NewMenuHandler(reportsService)
+	reportsDal := dal.NewReportsRepo(*flags.Dir + "/orders.json")
+	reportsService := service.NewFileReportsService(reportsDal)
+	reportsHandler := handler.NewReportsHandler(reportsService)
 
 	// reports
 	mux.HandleFunc("GET /reports/total-sales", reportsHandler.GetTotalSales)

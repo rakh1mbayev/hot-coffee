@@ -1,8 +1,6 @@
 package service
 
 import (
-	"bytes"
-	"encoding/binary"
 	"errors"
 	"fmt"
 
@@ -16,8 +14,6 @@ type MenuService interface {
 	GetByID(id string) (*model.MenuItem, error)
 	Update(id string, item model.MenuItem) error
 	Delete(id string) error
-	TotalPrice() ([]byte, error)
-	PopularItems() (string, error)
 }
 
 type FileMenuService struct {
@@ -61,7 +57,6 @@ func (f *FileMenuService) Add(item model.MenuItem) error {
 		}
 	}
 
-	model.TotalPrice += item.Price
 	items, err := f.dataAccess.GetAll()
 	if err != nil {
 		return err
@@ -131,29 +126,4 @@ func (f *FileMenuService) Delete(id string) error {
 		return fmt.Errorf("menu item not found")
 	}
 	return f.dataAccess.Save(updatedItems)
-}
-
-func (f *FileMenuService) TotalPrice() ([]byte, error) {
-	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.LittleEndian, model.TotalPrice) // or binary.BigEndian for big-endian
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func (f *FileMenuService) PopularItems() (string, error) {
-	items, err := f.dataAccess.GetAll()
-	if err != nil {
-		return "", err
-	}
-	var name string
-	var maxPopularity int
-
-	for _, popularity := range items {
-		if maxPopularity < model.PopularItem[popularity.ID] {
-			name = popularity.Name
-		}
-	}
-	return name, nil
 }

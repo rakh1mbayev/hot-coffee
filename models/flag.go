@@ -10,8 +10,7 @@ var (
 	Dir  = flag.String("dir", "data", "Path to the data directory")
 	Port = flag.String("port", "7070", "Port number")
 
-	TotalPrice  = 0.0
-	PopularItem = map[string]int{}
+	PriceList = make(map[string]float64)
 
 	Logger *slog.Logger
 )
