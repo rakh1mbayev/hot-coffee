@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
 
 	dal "hot-coffee/internal/dal"
@@ -31,7 +32,7 @@ func (f *FileMenuService) Add(item model.MenuItem) error {
 	if item.ID == "" {
 		fmt.Println("Menu ID can not be empty")
 		model.Logger.Error("Menu ID can not be empty")
-		return nil
+		return errors.New("Menu ID can not be empty")
 	}
 
 	if item.Name == "" {

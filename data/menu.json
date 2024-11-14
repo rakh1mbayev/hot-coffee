@@ -26,5 +26,25 @@
 				"quantity": 1
 			}
 		]
+	},
+	{
+		"product_id": "muffin",
+		"name": "Blueberry Muffin",
+		"description": "Freshly baked muffin with blueberries",
+		"price": 2,
+		"ingredients": [
+			{
+				"ingredient_id": "flour",
+				"quantity": 100
+			},
+			{
+				"ingredient_id": "blueberries",
+				"quantity": 20
+			},
+			{
+				"ingredient_id": "sugar",
+				"quantity": 30
+			}
+		]
 	}
 ]

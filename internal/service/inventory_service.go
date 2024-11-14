@@ -1,8 +1,8 @@
 package service
 
 import (
+	"errors"
 	"fmt"
-
 	"hot-coffee/internal/dal"
 	"hot-coffee/models"
 )
@@ -27,7 +27,7 @@ func (s *FileInventoryService) Add(item models.InventoryItem) error {
 	if item.IngredientID == "" {
 		models.Logger.Error("Ingredient ID can not be empty")
 		fmt.Println("Ingredient ID can not be empty")
-		return nil
+		return errors.New("Ingredient ID can not be empty")
 	}
 
 	if item.Name == "" {
