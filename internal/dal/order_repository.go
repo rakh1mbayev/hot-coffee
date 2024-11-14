@@ -2,8 +2,9 @@ package dal
 
 import (
 	"encoding/json"
-	model "hot-coffee/models"
 	"os"
+
+	model "hot-coffee/models"
 )
 
 type OrderDalInterface interface {
@@ -28,9 +29,9 @@ func (f *OrderData) GetAll() ([]model.Order, error) {
 }
 
 func (f *OrderData) Save(items []model.Order) error {
-	fileData, err := json.Marshal(items)
+	fileData, err := json.MarshalIndent(items, "", "\t")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(f.FilePath, fileData, 0644)
+	return os.WriteFile(f.FilePath, fileData, 0o644)
 }

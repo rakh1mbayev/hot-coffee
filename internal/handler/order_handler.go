@@ -2,11 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"hot-coffee/internal/service"
-	model "hot-coffee/models"
 	"io"
 	"net/http"
 	"strings"
+
+	"hot-coffee/internal/dal"
+	"hot-coffee/internal/service"
+	model "hot-coffee/models"
 )
 
 type OrderHandler struct {
@@ -18,35 +20,28 @@ func NewOrdersHandler(service service.OrdersService) *OrderHandler {
 }
 
 func (o *OrderHandler) Add(w http.ResponseWriter, r *http.Request) {
-	var newOrderItem model.OrderItem
+	var newOrderItem model.Order
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		model.Logger.Error("Error reading request body")
-		service.ErrorHandling("Error reading request body", w)
+		dal.SendError("Error reading request body", http.StatusBadRequest, w)
 		return
 	}
 	if err := json.Unmarshal(body, &newOrderItem); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		model.Logger.Error("Invalid JSON")
-		service.ErrorHandling("Invalid JSON", w)
+		dal.SendError("Invalid JSON", http.StatusBadRequest, w)
 		return
 	}
 	if err := o.service.Add(newOrderItem); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		model.Logger.Error("Failed to add order item")
-		service.ErrorHandling("Failed to add order item", w)
+		dal.SendError("Failed to add order item", http.StatusInternalServerError, w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 }
+
 func (o *OrderHandler) Get(w http.ResponseWriter, r *http.Request) {
 	items, err := o.service.Get()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		model.Logger.Error("Failed to load orders")
-		service.ErrorHandling("Failed to load orders", w)
+		dal.SendError("Failed to load orders", http.StatusInternalServerError, w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
@@ -58,16 +53,12 @@ func (o *OrderHandler) Get(w http.ResponseWriter, r *http.Request) {
 func (o *OrderHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		w.WriteHeader(http.StatusBadRequest)
-		model.Logger.Error("Invalid request path")
-		service.ErrorHandling("Invalid request path", w)
+		dal.SendError("Invalid request path", http.StatusBadRequest, w)
 		return
 	}
 	item, err := o.service.GetByID(path[2])
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		model.Logger.Error("Order item not found")
-		service.ErrorHandling("Order item not found", w)
+		dal.SendError("Order item not found", http.StatusNotFound, w)
 		return
 	}
 
@@ -78,60 +69,52 @@ func (o *OrderHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (o *OrderHandler) Update(w http.ResponseWriter, r *http.Request) {
-	var updatedItem model.OrderItem
+	var updatedItem model.Order
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		model.Logger.Error("Error reading request body")
-		service.ErrorHandling("Error reading request body", w)
+		dal.SendError("Error reading request body", http.StatusBadRequest, w)
 		return
 	}
 	if err := json.Unmarshal(body, &updatedItem); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		model.Logger.Error("Invalid JSON")
-		service.ErrorHandling("Invalid JSON", w)
+		dal.SendError("Invalid JSON", http.StatusBadRequest, w)
 		return
 	}
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		w.WriteHeader(http.StatusBadRequest)
-		model.Logger.Error("Invalid request path")
-		service.ErrorHandling("Invalid request path", w)
+		dal.SendError("Invalid request path", http.StatusBadRequest, w)
 		return
 	}
-
-	if 	err := o.service.Update(path[2], updatedItem); err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		model.Logger.Error("Order item not found")
-		service.ErrorHandling("Order item not found", w)
+	if err := o.service.Update(path[2], updatedItem); err != nil {
+		dal.SendError("Order item not found", http.StatusNotFound, w)
 		return
 	}
+	w.Header().Set("Content-type", "application/json")
 }
 
 func (o *OrderHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		dal.SendError("Invalid request path", http.StatusBadRequest, w)
 		return
 	}
 	err := o.service.Delete(path[2])
 	if err != nil {
-		http.Error(w, "Order item not found", http.StatusNotFound)
+		dal.SendError("Order item not found", http.StatusNotFound, w)
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusNoContent)
 }
-func (o *OrderHandler) Close(w http.ResponseWriter, r *http.Request) {
 
+func (o *OrderHandler) Close(w http.ResponseWriter, r *http.Request) {
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
-		http.Error(w, "Invalid request path", http.StatusBadRequest)
+		dal.SendError("Invalid request path", http.StatusBadRequest, w)
 		return
 	}
 	err := o.service.Close(path[2])
 	if err != nil {
-		http.Error(w, "Order item not found", http.StatusNotFound)
+		dal.SendError("Order item not found", http.StatusNotFound, w)
 		return
 	}
 }

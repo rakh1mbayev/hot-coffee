@@ -2,8 +2,9 @@ package dal
 
 import (
 	"encoding/json"
-	model "hot-coffee/models"
 	"os"
+
+	model "hot-coffee/models"
 )
 
 type MenuDalInterface interface {
@@ -37,5 +38,5 @@ func (f *MenuData) Save(items []model.MenuItem) error {
 		return err
 	}
 
-	return os.WriteFile(f.filePath, fileData, 0644)
+	return os.WriteFile(f.filePath, fileData, 0o644)
 }

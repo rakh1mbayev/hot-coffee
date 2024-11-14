@@ -1,7 +1,9 @@
 package service
 
 import (
+	"errors"
 	"fmt"
+
 	"hot-coffee/internal/dal"
 	"hot-coffee/models"
 )
@@ -10,10 +12,8 @@ type InventoryInterface interface {
 	Add(models.InventoryItem) error
 	Get() ([]models.InventoryItem, error)
 	GetByID(id string) (models.InventoryItem, error)
-	Update(string, models.InventoryItem) error
+	Update(string, models.InventoryItem, int) error
 	Delete(string) error
-	Delete(string) error
-	Update(string, models.InventoryItem) (*models.InventoryItem ,error)
 }
 
 type FileInventoryService struct {
@@ -24,45 +24,46 @@ func NewInventoryService(inventoryDal dal.InventoryDalInterface) *FileInventoryS
 	return &FileInventoryService{dataAccess: inventoryDal}
 }
 
-func (s *inventoryService) Add(newInventoryItem models.InventoryItem) error {
-	if newInventoryItem.IngredientID == "" {
-		// error
+func (s *FileInventoryService) Add(item models.InventoryItem) error {
+	if item.IngredientID == "" {
+		models.Logger.Error("Ingredient ID can not be empty")
 		fmt.Println("Ingredient ID can not be empty")
-		return nil
+		return errors.New("ingredient ID can not be empty")
 	}
 
-	if newInventoryItem.Name == "" {
-		// error
+	if item.Name == "" {
+		models.Logger.Error("Ingredient name can not be empty")
 		fmt.Println("Ingredient name can not be empty")
-		return nil
+		return errors.New("ingredient name can not be empty")
 	}
 
-	if newInventoryItem.Unit == "" {
+	if item.Unit == "" {
+		models.Logger.Error("Ingredient unit can not be empty")
 		fmt.Println("Ingredient unit can not be empty")
-		return nil
+		return errors.New("ingredient unit can not be empty")
 	}
 
-	if newInventoryItem.Quantity <= 0 {
+	if item.Quantity <= 0 {
+		models.Logger.Error("Ingredient quantity can not be equal or lower than 0 (quantity > 0)")
 		fmt.Println("Ingredient quantity can not be equal or lower than 0 (quantity > 0)")
-		return nil
+		return errors.New("ingredient quantity can not be equal or lower than 0 (quantity > 0)")
 	}
 
-	items, err := s.inventoryAccess.GetAll()
+	items, err := s.dataAccess.GetAll()
 	if err != nil {
-		// error
-		return err
+		return errors.New("coul do not get data")
 	}
 
 	for _, val := range items {
-		if val.IngredientID == newInventoryItem.IngredientID {
-			// error
+		if val.IngredientID == item.IngredientID {
+			models.Logger.Error("Ingredient ID can not be same")
 			fmt.Println("Ingredient ID can not be same")
-			return nil
+			return errors.New("ingredient ID can not be same")
 		}
 	}
 
-	items = append(items, newInventoryItem)
-	return s.inventoryAccess.SaveInventoryItems(items)
+	items = append(items, item)
+	return s.dataAccess.Save(items)
 }
 
 func (s *FileInventoryService) Get() ([]models.InventoryItem, error) {
@@ -79,24 +80,24 @@ func (s *FileInventoryService) GetByID(id string) (models.InventoryItem, error) 
 			return item, nil
 		}
 	}
+	models.Logger.Info("menu item not found")
 	return models.InventoryItem{}, fmt.Errorf("menu item not found")
 }
 
-func (s *inventoryService) Update(id string, item models.InventoryItem) (*models.InventoryItem, error) {
-	items, err := s.inventoryAccess.GetAll()
+func (s *FileInventoryService) Update(id string, item models.InventoryItem, newQuantity int) error {
+	items, err := s.dataAccess.GetAll()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	for i, existingItem := range items {
 		if existingItem.IngredientID == id {
 			items[i] = item
-			if err := s.inventoryAccess.SaveInventoryItems(items); err != nil {
-				return nil, err
-			}
-			return &item, nil
+			items[i].Quantity = float64(newQuantity)
+			return s.dataAccess.Save(items)
 		}
 	}
-	return nil, fmt.Errorf("menu item not found")
+	models.Logger.Info("inventory item not found")
+	return fmt.Errorf("inventory item not found")
 }
 
 func (s *FileInventoryService) Delete(id string) error {
@@ -104,11 +105,18 @@ func (s *FileInventoryService) Delete(id string) error {
 	if err != nil {
 		return err
 	}
+	found := false
 	var updatedItems []models.InventoryItem
 	for _, item := range items {
 		if item.IngredientID != id {
 			updatedItems = append(updatedItems, item)
+		} else {
+			found = true
 		}
 	}
-	return s.inventoryAccess.SaveInventoryItems(updatedItems)
+	if !found {
+		models.Logger.Info("inventory item not found")
+		return fmt.Errorf("inventory item not found")
+	}
+	return s.dataAccess.Save(updatedItems)
 }
