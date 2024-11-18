@@ -1,6 +1,6 @@
 # hot-coffee
 
-## Learning Objectives
+## This project implemented coffee management system and used:
 
 - REST API
 - JSON
