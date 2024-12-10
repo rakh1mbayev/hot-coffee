@@ -3,13 +3,14 @@ package service
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"hot-coffee/internal/dal"
 	model "hot-coffee/models"
 )
 
 type OrdersService interface {
-	Add(item model.Order) error
+	Add(item model.CreateOrderRequest) error
 	Get() ([]model.Order, error)
 	GetByID(id string) (*model.Order, error)
 	Update(id string, item model.Order) error
@@ -31,15 +32,21 @@ func NewFileOrderService(filePath string, menuService MenuService, inventoryServ
 	}
 }
 
-func (o *FileOrderService) Add(order model.Order) error {
+func (o *FileOrderService) Add(orderCheck model.CreateOrderRequest) error {
 	// 1. Validate required fields
-	if order.ID == "" || order.CustomerName == "" || order.CreatedAt == "" || order.Status != "open" {
-		model.Logger.Error("Invalid order data: missing fields or incorrect status")
+	if orderCheck.CustomerName == "" {
+		model.Logger.Error("Invalid order data: missing fields")
 		return fmt.Errorf("invalid order data")
 	}
 
 	// 2. Check if all items exist in the menu and validate inventory
-	for _, orderItem := range order.Items {
+	for _, orderItem := range orderCheck.Items {
+		if orderItem.Quantity <= 0 {
+			fmt.Println("Quantity can not be less or equal to 0 (quantity > 0)")
+			model.Logger.Error("Quantity can not be less or equal to 0 (quantity > 0)")
+			return fmt.Errorf("quantity can not be less or equal to 0")
+		}
+
 		// Check if item exists in the menu
 		menuItem, err := o.menuAccess.GetByID(orderItem.ProductID)
 		if err != nil {
@@ -68,19 +75,34 @@ func (o *FileOrderService) Add(order model.Order) error {
 	}
 
 	// 3. Check for duplicate Order ID
+	generateID := generateOrderID()
 	existingOrders, err := o.dataAccess.GetAll()
 	if err != nil {
 		return err
 	}
-	for _, existingOrder := range existingOrders {
-		if existingOrder.ID == order.ID {
-			fmt.Println("Duplicate order ID")
-			model.Logger.Error("Duplicate order ID")
-			return fmt.Errorf("order ID already exists")
+
+	for {
+		isUnique := true
+		for _, existingOrder := range existingOrders {
+			if existingOrder.ID == generateID {
+				generateID = generateOrderID()
+				isUnique = false
+				break
+			}
+		}
+		if isUnique {
+			break // Exit outer loop when ID is unique
 		}
 	}
 
 	// 4. Save the new order
+	order := model.Order{
+		ID:           generateID,
+		CustomerName: orderCheck.CustomerName,
+		Items:        orderCheck.Items,
+		Status:       "open",
+		CreatedAt:    time.Now().Format(time.RFC3339),
+	}
 	existingOrders = append(existingOrders, order)
 	return o.dataAccess.Save(existingOrders)
 }
@@ -214,4 +236,8 @@ func (o *FileOrderService) Close(id string) error {
 	orders[orderIndex].Status = "closed"
 
 	return o.dataAccess.Save(orders)
+}
+
+func generateOrderID() string {
+	return fmt.Sprintf("%d", time.Now().UnixNano())
 }

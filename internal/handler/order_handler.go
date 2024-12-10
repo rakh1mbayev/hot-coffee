@@ -20,7 +20,7 @@ func NewOrdersHandler(service service.OrdersService) *OrderHandler {
 }
 
 func (o *OrderHandler) Add(w http.ResponseWriter, r *http.Request) {
-	var newOrderItem model.Order
+	var newOrderItem model.CreateOrderRequest
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		dal.SendError("Error reading request body", http.StatusBadRequest, w)

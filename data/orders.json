@@ -1,1 +1,78 @@
-[]
+[
+	{
+		"order_id": "order-1733760583079253600",
+		"customer_name": "John Doe",
+		"items": [
+			{
+				"product_id": "fanta",
+				"quantity": 2
+			},
+			{
+				"product_id": "latte",
+				"quantity": 1
+			}
+		],
+		"status": "close",
+		"created_at": "2024-12-09T21:09:43+05:00"
+	},
+	{
+		"order_id": "order-1733799610321385900",
+		"customer_name": "Jane Doe",
+		"items": [
+			{
+				"product_id": "fanta",
+				"quantity": 1
+			},
+			{
+				"product_id": "latte",
+				"quantity": 1
+			}
+		],
+		"status": "close",
+		"created_at": "2024-12-10T08:00:10+05:00"
+	},
+	{
+		"order_id": "order-1733799714277292200",
+		"customer_name": "Jane Doe",
+		"items": [
+			{
+				"product_id": "fanta",
+				"quantity": 1
+			},
+			{
+				"product_id": "latte",
+				"quantity": 1
+			}
+		],
+		"status": "open",
+		"created_at": "2024-12-10T08:01:54+05:00"
+	},
+	{
+		"order_id": "1733801224382750600",
+		"customer_name": "Kakimbek Adil",
+		"items": [
+			{
+				"product_id": "fanta",
+				"quantity": 2
+			},
+			{
+				"product_id": "latte",
+				"quantity": 2
+			}
+		],
+		"status": "closed",
+		"created_at": "2024-12-10T08:27:04+05:00"
+	},
+	{
+		"order_id": "1733802680885348600",
+		"customer_name": "Kakimbek Adil",
+		"items": [
+			{
+				"product_id": "fanta",
+				"quantity": 5
+			}
+		],
+		"status": "closed",
+		"created_at": "2024-12-10T08:51:20+05:00"
+	}
+]
